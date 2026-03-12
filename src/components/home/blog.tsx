@@ -48,10 +48,10 @@ export default function Blog({ items }: { items: DBBlogPost[] }) {
                     )}
                   </div>
                   <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-secondary transition-colors">
-                    <Link href="#">{post.title}</Link>
+                    <Link href={`/blog/${post.slug}`}>{post.title}</Link>
                   </h3>
                   <p className="mt-2 text-muted-foreground text-sm flex-grow line-clamp-3">{post.excerpt}</p>
-                  <Link href="#" className="flex items-center gap-1.5 text-secondary text-sm font-medium mt-4 hover:gap-2.5 transition-all">
+                  <Link href={`/blog/${post.slug}`} className="flex items-center gap-1.5 text-secondary text-sm font-medium mt-4 hover:gap-2.5 transition-all">
                     Read more <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>

@@ -118,3 +118,27 @@ export async function getAttorneyBySlug(slug: string): Promise<DBAttorney | null
   if (error) { console.error('Error fetching attorney:', error); return null; }
   return data;
 }
+
+export async function getBlogPostBySlug(slug: string): Promise<DBBlogPost | null> {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('id, title, slug, category, excerpt, content, cover_image_url, author_id, status, is_featured, published_at')
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .single();
+  if (error) { console.error('Error fetching blog post:', error); return null; }
+  return data;
+}
+
+export type DBPracticeAreaFull = DBPracticeArea & { long_description: string };
+
+export async function getPracticeAreaBySlug(slug: string): Promise<DBPracticeAreaFull | null> {
+  const { data, error } = await supabase
+    .from('practice_areas')
+    .select('id, name, slug, icon_name, short_description, long_description, display_order')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single();
+  if (error) { console.error('Error fetching practice area:', error); return null; }
+  return data;
+}

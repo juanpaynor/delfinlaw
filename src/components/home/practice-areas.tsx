@@ -66,7 +66,7 @@ function FlipTiltCard({ area, index }: { area: DBPracticeArea; index: number }) 
           </div>
           <p className="text-sm leading-relaxed opacity-90">{area.short_description}</p>
         </div>
-        <Link href={`#${area.slug}`} className="text-accent text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all mt-3">
+        <Link href={`/practice-areas/${area.slug}`} className="text-accent text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all mt-3">
           Learn more →
         </Link>
       </motion.div>

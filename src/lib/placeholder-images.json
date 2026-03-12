@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "An abstract, professional background image for the hero section, suggesting legal or corporate environments.",
+      "imageUrl": "https://picsum.photos/seed/hero/1920/1080",
+      "imageHint": "office building"
+    },
+    {
+      "id": "attorney1",
+      "description": "Professional headshot of Eleonora Delfin.",
+      "imageUrl": "https://picsum.photos/seed/attorney1/500/500",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "attorney2",
+      "description": "Professional headshot of Marcus Thorne.",
+      "imageUrl": "https://picsum.photos/seed/attorney2/500/500",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "attorney3",
+      "description": "Professional headshot of Isabella Rossi.",
+      "imageUrl": "https://picsum.photos/seed/attorney3/500/500",
+      "imageHint": "woman professional"
+    },
+    {
+      "id": "attorney4",
+      "description": "Professional headshot of Julian Chen.",
+      "imageUrl": "https://picsum.photos/seed/attorney4/500/500",
+      "imageHint": "man professional"
+    },
+    {
+      "id": "blog1",
+      "description": "Image for a blog post about corporate law.",
+      "imageUrl": "https://picsum.photos/seed/blog1/600/400",
+      "imageHint": "business meeting"
+    },
+    {
+      "id": "blog2",
+      "description": "Image for a blog post about real estate.",
+      "imageUrl": "https://picsum.photos/seed/blog2/600/400",
+      "imageHint": "modern house"
+    },
+    {
+      "id": "blog3",
+      "description": "Image for a blog post about digital privacy.",
+      "imageUrl": "https://picsum.photos/seed/blog3/600/400",
+      "imageHint": "server room"
+    }
+  ]
 }

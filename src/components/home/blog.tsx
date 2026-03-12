@@ -1,59 +1,63 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { blogPosts } from '@/lib/data';
-import allImages from '@/lib/placeholder-images.json';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, ArrowRight } from 'lucide-react';
+import { SectionHeading, ScrollReveal } from '@/components/ui/scroll-animations';
+import type { DBBlogPost } from '@/lib/supabase-data';
 
-export default function Blog() {
+export default function Blog({ items }: { items: DBBlogPost[] }) {
+  if (items.length === 0) return null;
+
   return (
-    <section id="blog" className="py-20 md:py-32 bg-card">
+    <section id="blog" className="py-24 md:py-32 bg-muted/50">
       <div className="container mx-auto px-4 md:px-6">
-        <div className="text-center mb-12">
-          <h2 className="font-headline text-4xl md:text-5xl font-bold">Legal Insights & News</h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Stay informed with our latest articles, analyses, and firm news.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogPosts.map((post) => {
-            const postImage = allImages.placeholderImages.find(img => img.id === post.imageUrlId);
-            return (
-              <Card key={post.slug} className="overflow-hidden bg-background border-border/50 hover:shadow-xl transition-shadow duration-300 flex flex-col group">
-                {postImage && (
-                  <CardHeader className="p-0">
-                    <div className="aspect-video relative overflow-hidden">
-                      <Image
-                        src={postImage.imageUrl}
-                        alt={`Image for ${post.title}`}
-                        data-ai-hint={postImage.imageHint}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  </CardHeader>
+        <SectionHeading
+          subtitle="Insights"
+          title="Legal Insights & News"
+          description="Stay informed with our latest articles and analyses."
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((post, i) => (
+            <ScrollReveal key={post.id} effect="fade-up" delay={i * 0.06}>
+              <div className="h-full bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col group">
+                {post.cover_image_url ? (
+                  <div className="aspect-video relative overflow-hidden">
+                    <Image
+                      src={post.cover_image_url}
+                      alt={`Image for ${post.title}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-muted flex items-center justify-center">
+                    <span className="text-3xl text-muted-foreground/20 font-bold">{post.category}</span>
+                  </div>
                 )}
-                <CardContent className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                        <Badge variant="outline" className="text-primary border-primary/50">{post.category}</Badge>
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="h-4 w-4"/>
-                            <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                        </div>
-                    </div>
-                  <CardTitle className="font-headline text-xl font-bold leading-tight group-hover:text-primary transition-colors">
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                    <Badge variant="outline" className="text-secondary border-secondary/30 rounded-md text-xs">{post.category}</Badge>
+                    {post.published_at && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-headline text-lg font-bold leading-snug group-hover:text-secondary transition-colors">
                     <Link href="#">{post.title}</Link>
-                  </CardTitle>
-                  <CardDescription className="mt-3 text-muted-foreground flex-1">{post.excerpt}</CardDescription>
-                  <Button asChild variant="link" className="p-0 h-auto mt-4 self-start text-accent">
-                    <Link href="#">Read More <ArrowRight className="h-4 w-4 ml-1" /></Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </h3>
+                  <p className="mt-2 text-muted-foreground text-sm flex-grow line-clamp-3">{post.excerpt}</p>
+                  <Link href="#" className="flex items-center gap-1.5 text-secondary text-sm font-medium mt-4 hover:gap-2.5 transition-all">
+                    Read more <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </ScrollReveal>
+          ))}
         </div>
       </div>
     </section>

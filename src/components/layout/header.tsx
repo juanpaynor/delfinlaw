@@ -6,16 +6,16 @@ import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import Logo from '@/components/logo';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { navigationLinks } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { ContactModal } from '@/components/contact-modal';
 
-export default function Header() {
+export default function Header({ logoUrl }: { logoUrl?: string }) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -24,67 +24,67 @@ export default function Header() {
     <header
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
-        isScrolled ? 'bg-background/80 backdrop-blur-sm border-b border-border' : 'bg-transparent'
+        isScrolled
+          ? 'bg-background/80 backdrop-blur-xl shadow-[0_1px_0_0_hsl(var(--border))]'
+          : 'bg-transparent'
       )}
     >
-      <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" aria-label="Delfin Law Advocates Home">
-          <Logo />
+          <Logo logoUrl={logoUrl} />
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-8">
           {navigationLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {link.name}
             </Link>
           ))}
-          <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
-            <Link href="#contact">Request Consultation</Link>
-          </Button>
         </nav>
 
-        {/* Mobile Navigation */}
+        <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
+          <ContactModal>
+            <Button size="sm" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-5">
+              Get in Touch
+            </Button>
+          </ContactModal>
+        </div>
+
+        {/* Mobile */}
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
             <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Open menu</span>
+              <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-background">
+          <SheetContent side="right" className="w-[300px] bg-background p-6">
             <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between border-b pb-4">
-                 <Link href="/" aria-label="Delfin Law Advocates Home">
-                    <Logo />
-                </Link>
+              <div className="flex items-center justify-between mb-8">
+                <Logo logoUrl={logoUrl} />
                 <SheetClose asChild>
-                    <Button variant="ghost" size="icon">
-                        <X className="h-6 w-6" />
-                        <span className="sr-only">Close menu</span>
-                    </Button>
+                  <Button variant="ghost" size="icon"><X className="h-5 w-5" /></Button>
                 </SheetClose>
               </div>
-              <nav className="flex flex-col gap-4 mt-8 flex-1">
+              <nav className="flex flex-col gap-4 flex-1">
                 {navigationLinks.map((link) => (
                   <SheetClose asChild key={link.name}>
-                    <Link
-                      href={link.href}
-                      className="text-lg font-medium text-foreground transition-colors hover:text-primary"
-                    >
+                    <Link href={link.href} className="text-lg text-foreground hover:text-primary transition-colors">
                       {link.name}
                     </Link>
                   </SheetClose>
                 ))}
               </nav>
               <SheetClose asChild>
-                <Button asChild className="w-full bg-accent hover:bg-accent/90 text-accent-foreground mt-auto">
-                    <Link href="#contact">Request Consultation</Link>
-                </Button>
+                <ContactModal>
+                  <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                    Get in Touch
+                  </Button>
+                </ContactModal>
               </SheetClose>
             </div>
           </SheetContent>

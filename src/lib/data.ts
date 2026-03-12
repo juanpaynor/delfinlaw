@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Users, Building2, Home, HeartHand, Briefcase, NotebookText, Gavel } from 'lucide-react';
+import { Users, Building2, Home, HeartHandshake, Briefcase, NotebookText, Gavel } from 'lucide-react';
 
 export const navigationLinks = [
   { name: 'Practice Areas', href: '#practice-areas' },
@@ -37,7 +37,7 @@ export const practiceAreas: PracticeArea[] = [
   },
   {
     name: "Personal Injury",
-    icon: HeartHand,
+    icon: HeartHandshake,
     description: "Fighting for your rights and fair compensation after an accident or injury.",
     slug: "personal-injury"
   },

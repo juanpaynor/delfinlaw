@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RichEditor } from "@/components/admin/rich-editor";
+import { ImageUpload } from "@/components/admin/image-upload";
 
 type PracticeArea = { id: string; name: string };
 type CaseStudy = {
@@ -120,50 +122,96 @@ export default function CaseStudiesAdmin() {
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" />Add Case Study</Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-headline">{editingId ? "Edit" : "Add"} Case Study</DialogTitle>
+          <DialogContent className="bg-card border-border max-w-4xl w-[95vw] h-[85vh] flex flex-col p-0">
+            <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+              <DialogTitle className="font-headline text-xl">{editingId ? "Edit" : "Add"} Case Study</DialogTitle>
+              <p className="text-sm text-muted-foreground">Document a successful case outcome.</p>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Title</Label>
-                  <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Case title" className="bg-background" />
+
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <div className="grid md:grid-cols-[280px_1fr] gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Details</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Title</Label>
+                        <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Case title" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Practice Area</Label>
+                        <Select value={form.practice_area_id} onValueChange={(v) => setForm({ ...form, practice_area_id: v })}>
+                          <SelectTrigger className="bg-[#fafafa] border-border/60 h-10 rounded-lg"><SelectValue placeholder="Select area" /></SelectTrigger>
+                          <SelectContent>
+                            {practiceAreas.map((pa) => <SelectItem key={pa.id} value={pa.id}>{pa.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cover Image</h3>
+                    <ImageUpload
+                      folder="blog"
+                      currentUrl={form.cover_image_url}
+                      onUpload={(url) => setForm({ ...form, cover_image_url: url })}
+                    />
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <Label className="text-[13px]">Active</Label>
+                      <p className="text-[11px] text-muted-foreground/60">Show on public site</p>
+                    </div>
+                    <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Practice Area</Label>
-                  <Select value={form.practice_area_id} onValueChange={(v) => setForm({ ...form, practice_area_id: v })}>
-                    <SelectTrigger className="bg-background"><SelectValue placeholder="Select area" /></SelectTrigger>
-                    <SelectContent>
-                      {practiceAreas.map((pa) => <SelectItem key={pa.id} value={pa.id}>{pa.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Challenge</h3>
+                    <RichEditor
+                      content={form.challenge}
+                      onChange={(html) => setForm({ ...form, challenge: html })}
+                      placeholder="What was the client facing?"
+                    />
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Approach</h3>
+                    <RichEditor
+                      content={form.approach}
+                      onChange={(html) => setForm({ ...form, approach: html })}
+                      placeholder="How did your team tackle it?"
+                    />
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Outcome</h3>
+                    <RichEditor
+                      content={form.outcome}
+                      onChange={(html) => setForm({ ...form, outcome: html })}
+                      placeholder="What was the result?"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Cover Image URL</Label>
-                <Input value={form.cover_image_url} onChange={(e) => setForm({ ...form, cover_image_url: e.target.value })} placeholder="https://..." className="bg-background" />
-              </div>
-              <div className="space-y-2">
-                <Label>Challenge</Label>
-                <Textarea value={form.challenge} onChange={(e) => setForm({ ...form, challenge: e.target.value })} placeholder="What was the client facing?" className="bg-background" rows={3} />
-              </div>
-              <div className="space-y-2">
-                <Label>Approach</Label>
-                <Textarea value={form.approach} onChange={(e) => setForm({ ...form, approach: e.target.value })} placeholder="How did your team tackle it?" className="bg-background" rows={3} />
-              </div>
-              <div className="space-y-2">
-                <Label>Outcome</Label>
-                <Textarea value={form.outcome} onChange={(e) => setForm({ ...form, outcome: e.target.value })} placeholder="What was the result?" className="bg-background" rows={3} />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
-                <Label>Active</Label>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">{editingId ? "Update" : "Create"}</Button>
-              </div>
+            </div>
+
+            <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+              <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+              <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 rounded-lg px-8">{editingId ? "Save Changes" : "Add Case Study"}</Button>
             </div>
           </DialogContent>
         </Dialog>

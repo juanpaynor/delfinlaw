@@ -21,6 +21,7 @@ import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { RichEditor } from "@/components/admin/rich-editor";
 
 type Attorney = { id: string; name: string };
 type BlogPost = {
@@ -142,66 +143,109 @@ export default function BlogAdmin() {
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" />New Post</Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-headline">{editingId ? "Edit" : "New"} Blog Post</DialogTitle>
+          <DialogContent className="bg-card border-border max-w-4xl w-[95vw] h-[85vh] flex flex-col p-0">
+            <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+              <DialogTitle className="font-headline text-xl">{editingId ? "Edit" : "New"} Blog Post</DialogTitle>
+              <p className="text-sm text-muted-foreground">Write and publish legal insights.</p>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Post title" className="bg-background" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Category</Label>
-                  <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Corporate Law" className="bg-background" />
+
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <div className="grid md:grid-cols-[280px_1fr] gap-8">
+                {/* Left Column: Meta */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Post Details</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Title</Label>
+                        <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Post title" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Category</Label>
+                        <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Corporate Law" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Author</Label>
+                        <Select value={form.author_id} onValueChange={(v) => setForm({ ...form, author_id: v })}>
+                          <SelectTrigger className="bg-[#fafafa] border-border/60 h-10 rounded-lg"><SelectValue placeholder="Select author" /></SelectTrigger>
+                          <SelectContent>
+                            {attorneys.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cover Image</h3>
+                    <ImageUpload
+                      folder="blog"
+                      currentUrl={form.cover_image_url}
+                      onUpload={(url) => setForm({ ...form, cover_image_url: url })}
+                    />
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Publishing</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Status</Label>
+                        <Select value={form.status} onValueChange={(v: "draft" | "published") => setForm({ ...form, status: v })}>
+                          <SelectTrigger className="bg-[#fafafa] border-border/60 h-10 rounded-lg"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between py-1">
+                        <div>
+                          <Label className="text-[13px]">Featured</Label>
+                          <p className="text-[11px] text-muted-foreground/60">Highlight on homepage</p>
+                        </div>
+                        <Switch checked={form.is_featured} onCheckedChange={(checked) => setForm({ ...form, is_featured: checked })} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Author</Label>
-                  <Select value={form.author_id} onValueChange={(v) => setForm({ ...form, author_id: v })}>
-                    <SelectTrigger className="bg-background"><SelectValue placeholder="Select author" /></SelectTrigger>
-                    <SelectContent>
-                      {attorneys.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+
+                {/* Right Column: Content */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Excerpt</h3>
+                    <div className="space-y-1.5">
+                      <Textarea
+                        value={form.excerpt}
+                        onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                        placeholder="Brief summary of the article..."
+                        className="bg-[#fafafa] border-border/60 rounded-lg text-justify min-h-[80px] leading-relaxed resize-none"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Content</h3>
+                    <RichEditor
+                      content={form.content}
+                      onChange={(html) => setForm({ ...form, content: html })}
+                      placeholder="Write your article..."
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Cover Image</Label>
-                <ImageUpload
-                  folder="blog"
-                  currentUrl={form.cover_image_url}
-                  onUpload={(url) => setForm({ ...form, cover_image_url: url })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Excerpt</Label>
-                <Textarea value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} placeholder="Brief summary..." className="bg-background" rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Content (Markdown)</Label>
-                <Textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder="Write your article in markdown..." className="bg-background font-mono text-sm" rows={12} />
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={form.status} onValueChange={(v: "draft" | "published") => setForm({ ...form, status: v })}>
-                    <SelectTrigger className="bg-background w-32"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2 pt-6">
-                  <Switch checked={form.is_featured} onCheckedChange={(checked) => setForm({ ...form, is_featured: checked })} />
-                  <Label>Featured</Label>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">{editingId ? "Update" : "Create"}</Button>
-              </div>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+              <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+              <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 rounded-lg px-8">{editingId ? "Save Changes" : "Publish Post"}</Button>
             </div>
           </DialogContent>
         </Dialog>

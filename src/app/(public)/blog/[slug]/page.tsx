@@ -80,9 +80,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         {/* Content */}
         <div className="mt-10 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary text-justify">
           {post.content ? (
-            post.content.split('\n').map((paragraph, i) => (
-              paragraph.trim() ? <p key={i}>{paragraph}</p> : null
-            ))
+            <div dangerouslySetInnerHTML={{ __html: post.content }} />
           ) : (
             <p className="text-muted-foreground italic">Full article coming soon.</p>
           )}

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RichEditor } from "@/components/admin/rich-editor";
 
 type PracticeArea = {
   id: string;
@@ -122,50 +123,89 @@ export default function PracticeAreasAdmin() {
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" />Add Practice Area</Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-headline">{editingId ? "Edit" : "Add"} Practice Area</DialogTitle>
+          <DialogContent className="bg-card border-border max-w-4xl w-[95vw] h-[85vh] flex flex-col p-0">
+            <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+              <DialogTitle className="font-headline text-xl">{editingId ? "Edit" : "Add"} Practice Area</DialogTitle>
+              <p className="text-sm text-muted-foreground">Define the legal services your firm offers.</p>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Corporate Law" className="bg-background" />
-              </div>
-              <div className="space-y-2">
-                <Label>Slug</Label>
-                <Input value={form.slug || generateSlug(form.name)} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated" className="bg-background" />
-              </div>
-              <div className="space-y-2">
-                <Label>Icon</Label>
-                <div className="flex flex-wrap gap-2">
-                  {iconOptions.map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      onClick={() => setForm({ ...form, icon_name: icon })}
-                      className={`px-3 py-1.5 rounded-md text-xs border transition-colors ${form.icon_name === icon ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border hover:border-primary/50"}`}
-                    >
-                      {icon}
-                    </button>
-                  ))}
+
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <div className="grid md:grid-cols-[280px_1fr] gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Details</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Name</Label>
+                        <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Corporate Law" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Slug</Label>
+                        <Input value={form.slug || generateSlug(form.name)} onChange={(e) => setForm({ ...form, slug: e.target.value })} placeholder="auto-generated" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Icon</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {iconOptions.map((icon) => (
+                        <button
+                          key={icon}
+                          type="button"
+                          onClick={() => setForm({ ...form, icon_name: icon })}
+                          className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${form.icon_name === icon ? "bg-primary text-primary-foreground border-primary" : "bg-[#fafafa] border-border/60 hover:border-primary/50"}`}
+                        >
+                          {icon}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <Label className="text-[13px]">Active</Label>
+                      <p className="text-[11px] text-muted-foreground/60">Show on public site</p>
+                    </div>
+                    <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Short Description</h3>
+                    <Textarea
+                      value={form.short_description}
+                      onChange={(e) => setForm({ ...form, short_description: e.target.value })}
+                      placeholder="Brief description shown on cards..."
+                      className="bg-[#fafafa] border-border/60 rounded-lg text-justify min-h-[80px] leading-relaxed resize-none"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Full Description</h3>
+                    <RichEditor
+                      content={form.long_description}
+                      onChange={(html) => setForm({ ...form, long_description: html })}
+                      placeholder="Detailed description for the dedicated page..."
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Short Description</Label>
-                <Textarea value={form.short_description} onChange={(e) => setForm({ ...form, short_description: e.target.value })} placeholder="Brief description for cards" className="bg-background" rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Long Description</Label>
-                <Textarea value={form.long_description} onChange={(e) => setForm({ ...form, long_description: e.target.value })} placeholder="Detailed description for the dedicated page" className="bg-background" rows={5} />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
-                <Label>Active</Label>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">{editingId ? "Update" : "Create"}</Button>
-              </div>
+            </div>
+
+            <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+              <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+              <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 rounded-lg px-8">{editingId ? "Save Changes" : "Add Practice Area"}</Button>
             </div>
           </DialogContent>
         </Dialog>

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RichEditor } from "@/components/admin/rich-editor";
 
 type Testimonial = {
   id: string;
@@ -101,49 +102,74 @@ export default function TestimonialsAdmin() {
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" />Add Testimonial</Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-headline">{editingId ? "Edit" : "Add"} Testimonial</DialogTitle>
+          <DialogContent className="bg-card border-border max-w-2xl w-[90vw] flex flex-col p-0">
+            <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+              <DialogTitle className="font-headline text-xl">{editingId ? "Edit" : "Add"} Testimonial</DialogTitle>
+              <p className="text-sm text-muted-foreground">Capture client feedback and praise.</p>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Client Name</Label>
-                  <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder="J. Doe" className="bg-background" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Case Type</Label>
-                  <Input value={form.case_type} onChange={(e) => setForm({ ...form, case_type: e.target.value })} placeholder="Corporate Law" className="bg-background" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Quote</Label>
-                <Textarea value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} placeholder="Client testimonial..." className="bg-background" rows={4} />
-              </div>
-              <div className="space-y-2">
-                <Label>Rating</Label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button key={star} type="button" onClick={() => setForm({ ...form, rating: star })}>
-                      <Star className={`h-6 w-6 ${star <= form.rating ? "text-accent fill-accent" : "text-muted-foreground"}`} />
-                    </button>
-                  ))}
+
+            <div className="overflow-y-auto px-8 py-6 space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Client Info</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Client Name</Label>
+                    <Input value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} placeholder="J. Doe" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Case Type</Label>
+                    <Input value={form.case_type} onChange={(e) => setForm({ ...form, case_type: e.target.value })} placeholder="Corporate Law" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Switch checked={form.is_featured} onCheckedChange={(checked) => setForm({ ...form, is_featured: checked })} />
-                  <Label>Featured</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
-                  <Label>Active</Label>
+
+              <div className="h-px bg-border/60" />
+
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Testimonial</h3>
+                <RichEditor
+                  content={form.quote}
+                  onChange={(html) => setForm({ ...form, quote: html })}
+                  placeholder="Write the client's testimonial here..."
+                />
+              </div>
+
+              <div className="h-px bg-border/60" />
+
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rating & Visibility</h3>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Rating</Label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button" onClick={() => setForm({ ...form, rating: star })}>
+                          <Star className={`h-6 w-6 ${star <= form.rating ? "text-accent fill-accent" : "text-muted-foreground"}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <Label className="text-[13px]">Featured</Label>
+                      <p className="text-[11px] text-muted-foreground/60">Highlight on homepage</p>
+                    </div>
+                    <Switch checked={form.is_featured} onCheckedChange={(checked) => setForm({ ...form, is_featured: checked })} />
+                  </div>
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <Label className="text-[13px]">Active</Label>
+                      <p className="text-[11px] text-muted-foreground/60">Show on public site</p>
+                    </div>
+                    <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
+                  </div>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">{editingId ? "Update" : "Create"}</Button>
-              </div>
+            </div>
+
+            <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+              <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+              <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 rounded-lg px-8">{editingId ? "Save Changes" : "Add Testimonial"}</Button>
             </div>
           </DialogContent>
         </Dialog>

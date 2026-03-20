@@ -104,7 +104,9 @@ export default async function AttorneyDetailPage({ params }: { params: Promise<{
             {/* Bio */}
             <div>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">About</h2>
-              <p className="text-foreground/80 leading-relaxed text-[17px] text-justify">{attorney.bio}</p>
+              <div className="text-foreground/80 leading-relaxed text-[17px] text-justify space-y-4">
+                {attorney.bio.split('\n').map((p: string, i: number) => p.trim() ? <p key={i}>{p}</p> : null)}
+              </div>
             </div>
 
             {/* Education */}

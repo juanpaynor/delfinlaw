@@ -47,11 +47,10 @@ export default async function PracticeAreaDetailPage({ params }: { params: Promi
         <p className="text-lg text-muted-foreground leading-relaxed text-justify">{area.short_description}</p>
 
         {area.long_description && (
-          <div className="mt-8 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary text-justify">
-            {area.long_description.split('\n').map((paragraph, i) => (
-              paragraph.trim() ? <p key={i}>{paragraph}</p> : null
-            ))}
-          </div>
+          <div
+            className="mt-8 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary text-justify"
+            dangerouslySetInnerHTML={{ __html: area.long_description }}
+          />
         )}
 
         <div className="mt-12">

@@ -143,63 +143,118 @@ export default function AttorneysAdmin() {
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" />Add Attorney</Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-headline">{editingId ? "Edit" : "Add"} Attorney</DialogTitle>
+          <DialogContent className="bg-card border-border max-w-4xl w-[95vw] h-[85vh] flex flex-col p-0">
+            <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+              <DialogTitle className="font-headline text-xl">{editingId ? "Edit" : "Add"} Attorney</DialogTitle>
+              <p className="text-sm text-muted-foreground">Fill in the attorney&apos;s details below.</p>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Full Name</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Jane Doe" className="bg-background" />
+
+            <div className="flex-1 overflow-y-auto px-8 py-6">
+              <div className="grid md:grid-cols-[280px_1fr] gap-8">
+                {/* Left Column: Photo & Personal */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Photo</h3>
+                    <ImageUpload
+                      folder="attorneys"
+                      currentUrl={form.photo_url}
+                      onUpload={(url) => setForm({ ...form, photo_url: url })}
+                    />
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Personal Info</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Full Name</Label>
+                        <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Jane Doe" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Title / Position</Label>
+                        <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Partner" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Email</Label>
+                        <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="jane@delfinlaw.com" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Phone</Label>
+                        <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="0962 448 1156" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="flex items-center justify-between py-1">
+                    <div>
+                      <Label className="text-[13px]">Active</Label>
+                      <p className="text-[11px] text-muted-foreground/60">Show on public site</p>
+                    </div>
+                    <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Title</Label>
-                  <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Senior Partner" className="bg-background" />
+
+                {/* Right Column: Bio & Expertise */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Biography</h3>
+                    <div className="space-y-1.5">
+                      <Textarea
+                        value={form.bio}
+                        onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                        placeholder={"Write the attorney's professional biography here...\n\nUse separate lines for different paragraphs. Text will display justified on the public site."}
+                        className="bg-[#fafafa] border-border/60 rounded-lg text-justify min-h-[220px] leading-relaxed resize-none"
+                        rows={10}
+                      />
+                      <p className="text-[11px] text-muted-foreground/60">Tip: Press Enter for paragraph breaks.</p>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Expertise</h3>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Specialties</Label>
+                        <Input value={form.specialtiesInput} onChange={(e) => setForm({ ...form, specialtiesInput: e.target.value })} placeholder="Corporate Law, Real Estate Law, Labor Law" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                        <p className="text-[11px] text-muted-foreground/60">Comma separated</p>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Education</Label>
+                        <Textarea
+                          value={form.education}
+                          onChange={(e) => setForm({ ...form, education: e.target.value })}
+                          placeholder={"J.D., University of the Philippines College of Law\nB.A. Political Science, Ateneo de Manila"}
+                          className="bg-[#fafafa] border-border/60 rounded-lg min-h-[100px] leading-relaxed resize-none"
+                          rows={4}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[13px]">Bar Admissions</Label>
+                        <Input value={form.bar_admissions} onChange={(e) => setForm({ ...form, bar_admissions: e.target.value })} placeholder="Philippine Bar, 2015" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Photo</Label>
-                <ImageUpload
-                  folder="attorneys"
-                  currentUrl={form.photo_url}
-                  onUpload={(url) => setForm({ ...form, photo_url: url })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Bio</Label>
-                <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Professional biography..." className="bg-background" rows={4} />
-              </div>
-              <div className="space-y-2">
-                <Label>Specialties (comma separated)</Label>
-                <Input value={form.specialtiesInput} onChange={(e) => setForm({ ...form, specialtiesInput: e.target.value })} placeholder="Corporate Law, Real Estate Law" className="bg-background" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="jane@delfinlaw.com" className="bg-background" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(123) 456-7890" className="bg-background" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Education</Label>
-                <Textarea value={form.education} onChange={(e) => setForm({ ...form, education: e.target.value })} placeholder="J.D., Harvard Law School" className="bg-background" rows={2} />
-              </div>
-              <div className="space-y-2">
-                <Label>Bar Admissions</Label>
-                <Input value={form.bar_admissions} onChange={(e) => setForm({ ...form, bar_admissions: e.target.value })} placeholder="State of New York, 2005" className="bg-background" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
-                <Label>Active</Label>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">{editingId ? "Update" : "Create"}</Button>
-              </div>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+              <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+              <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 rounded-lg px-8">{editingId ? "Save Changes" : "Add Attorney"}</Button>
             </div>
           </DialogContent>
         </Dialog>

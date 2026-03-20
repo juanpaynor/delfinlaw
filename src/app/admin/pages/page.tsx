@@ -14,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus, Pencil, Trash2, Layers } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { RichEditor } from "@/components/admin/rich-editor";
 
 type Page = { id: string; title: string; slug: string; meta_description: string; is_published: boolean; show_in_nav: boolean; display_order: number };
 type PageSection = { id: string; page_id: string; section_type: string; content: any; display_order: number; is_visible: boolean };
@@ -35,29 +36,29 @@ const defaultContent: Record<string, any> = {
 function SectionEditor({ content, type, onChange }: { content: any; type: string; onChange: (c: any) => void }) {
   const u = (k: string, v: any) => onChange({ ...content, [k]: v });
   if (type === "hero") return (<div className="space-y-3">
-    <div className="space-y-2"><Label>Headline</Label><Input value={content.headline||""} onChange={e=>u("headline",e.target.value)} className="bg-background"/></div>
-    <div className="space-y-2"><Label>Subheadline</Label><Input value={content.subheadline||""} onChange={e=>u("subheadline",e.target.value)} className="bg-background"/></div>
+    <div className="space-y-1.5"><Label className="text-[13px]">Headline</Label><Input value={content.headline||""} onChange={e=>u("headline",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
+    <div className="space-y-1.5"><Label className="text-[13px]">Subheadline</Label><Input value={content.subheadline||""} onChange={e=>u("subheadline",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
     <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-2"><Label>CTA Text</Label><Input value={content.cta_text||""} onChange={e=>u("cta_text",e.target.value)} className="bg-background"/></div>
-      <div className="space-y-2"><Label>CTA Link</Label><Input value={content.cta_link||""} onChange={e=>u("cta_link",e.target.value)} className="bg-background"/></div>
+      <div className="space-y-1.5"><Label className="text-[13px]">CTA Text</Label><Input value={content.cta_text||""} onChange={e=>u("cta_text",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
+      <div className="space-y-1.5"><Label className="text-[13px]">CTA Link</Label><Input value={content.cta_link||""} onChange={e=>u("cta_link",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
     </div>
-    <div className="space-y-2"><Label>Background Image URL</Label><Input value={content.background_image_url||""} onChange={e=>u("background_image_url",e.target.value)} className="bg-background"/></div>
+    <div className="space-y-1.5"><Label className="text-[13px]">Background Image URL</Label><Input value={content.background_image_url||""} onChange={e=>u("background_image_url",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
   </div>);
-  if (type === "text") return (<div className="space-y-2"><Label>Content (Markdown)</Label><Textarea value={content.body||""} onChange={e=>u("body",e.target.value)} className="bg-background font-mono text-sm" rows={10}/></div>);
+  if (type === "text") return (<div className="space-y-1.5"><Label className="text-[13px]">Content</Label><RichEditor content={content.body||""} onChange={v=>u("body",v)} placeholder="Write your content here..."/></div>);
   if (type === "image_text") return (<div className="space-y-3">
-    <div className="space-y-2"><Label>Image URL</Label><Input value={content.image_url||""} onChange={e=>u("image_url",e.target.value)} className="bg-background"/></div>
-    <div className="space-y-2"><Label>Text</Label><Textarea value={content.body||""} onChange={e=>u("body",e.target.value)} className="bg-background" rows={5}/></div>
-    <Select value={content.image_position||"left"} onValueChange={v=>u("image_position",v)}><SelectTrigger className="bg-background w-32"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="left">Left</SelectItem><SelectItem value="right">Right</SelectItem></SelectContent></Select>
+    <div className="space-y-1.5"><Label className="text-[13px]">Image URL</Label><Input value={content.image_url||""} onChange={e=>u("image_url",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
+    <div className="space-y-1.5"><Label className="text-[13px]">Text</Label><RichEditor content={content.body||""} onChange={v=>u("body",v)} placeholder="Write your content..."/></div>
+    <Select value={content.image_position||"left"} onValueChange={v=>u("image_position",v)}><SelectTrigger className="bg-[#fafafa] border-border/60 h-10 rounded-lg w-32"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="left">Left</SelectItem><SelectItem value="right">Right</SelectItem></SelectContent></Select>
   </div>);
   if (type === "cta_banner") return (<div className="space-y-3">
-    <div className="space-y-2"><Label>Headline</Label><Input value={content.headline||""} onChange={e=>u("headline",e.target.value)} className="bg-background"/></div>
-    <div className="space-y-2"><Label>Description</Label><Textarea value={content.description||""} onChange={e=>u("description",e.target.value)} className="bg-background" rows={3}/></div>
+    <div className="space-y-1.5"><Label className="text-[13px]">Headline</Label><Input value={content.headline||""} onChange={e=>u("headline",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
+    <div className="space-y-1.5"><Label className="text-[13px]">Description</Label><RichEditor content={content.description||""} onChange={v=>u("description",v)} placeholder="CTA description..."/></div>
     <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-2"><Label>Button Text</Label><Input value={content.button_text||""} onChange={e=>u("button_text",e.target.value)} className="bg-background"/></div>
-      <div className="space-y-2"><Label>Button Link</Label><Input value={content.button_link||""} onChange={e=>u("button_link",e.target.value)} className="bg-background"/></div>
+      <div className="space-y-1.5"><Label className="text-[13px]">Button Text</Label><Input value={content.button_text||""} onChange={e=>u("button_text",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
+      <div className="space-y-1.5"><Label className="text-[13px]">Button Link</Label><Input value={content.button_link||""} onChange={e=>u("button_link",e.target.value)} className="bg-[#fafafa] border-border/60 h-10 rounded-lg"/></div>
     </div>
   </div>);
-  return (<div className="space-y-2"><Label>Content (JSON)</Label><Textarea value={JSON.stringify(content,null,2)} onChange={e=>{try{onChange(JSON.parse(e.target.value))}catch{}}} className="bg-background font-mono text-sm" rows={10}/></div>);
+  return (<div className="space-y-1.5"><Label className="text-[13px]">Content (JSON)</Label><Textarea value={JSON.stringify(content,null,2)} onChange={e=>{try{onChange(JSON.parse(e.target.value))}catch{}}} className="bg-[#fafafa] border-border/60 rounded-lg font-mono text-sm" rows={10}/></div>);
 }
 
 export default function PagesAdmin() {
@@ -100,17 +101,24 @@ export default function PagesAdmin() {
         <div><h1 className="font-headline text-3xl font-bold">{selPage.title}</h1><p className="text-muted-foreground text-sm">/{selPage.slug}</p></div>
       </div>
       <div className="flex items-center gap-4">
-        <Select value={nst} onValueChange={setNst}><SelectTrigger className="bg-background w-48"><SelectValue/></SelectTrigger><SelectContent>{sectionTypes.map(st=><SelectItem key={st.value} value={st.value}>{st.label}</SelectItem>)}</SelectContent></Select>
+        <Select value={nst} onValueChange={setNst}><SelectTrigger className="bg-[#fafafa] border-border/60 h-10 rounded-lg w-48"><SelectValue/></SelectTrigger><SelectContent>{sectionTypes.map(st=><SelectItem key={st.value} value={st.value}>{st.label}</SelectItem>)}</SelectContent></Select>
         <Button onClick={()=>{setSf({section_type:nst,content:{...defaultContent[nst]},is_visible:true});setEditSid(null);setSdOpen(true);}} className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2"/>Add Section</Button>
       </div>
       <Dialog open={sdOpen} onOpenChange={setSdOpen}>
-        <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="font-headline">{editSid?"Edit":"Add"} Section</DialogTitle></DialogHeader>
-          {sf && <div className="space-y-4 mt-4">
-            <div className="flex items-center gap-2"><Badge>{sf.section_type}</Badge><div className="ml-auto flex items-center gap-2"><Switch checked={sf.is_visible} onCheckedChange={c=>setSf({...sf,is_visible:c})}/><Label>Visible</Label></div></div>
+        <DialogContent className="bg-card border-border max-w-3xl w-[95vw] h-[80vh] flex flex-col p-0">
+          <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+            <DialogTitle className="font-headline text-xl">{editSid?"Edit":"Add"} Section</DialogTitle>
+            <p className="text-sm text-muted-foreground">Configure the content for this section.</p>
+          </DialogHeader>
+          {sf && <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+            <div className="flex items-center gap-2"><Badge>{sf.section_type}</Badge><div className="ml-auto flex items-center gap-2"><Switch checked={sf.is_visible} onCheckedChange={c=>setSf({...sf,is_visible:c})}/><Label className="text-[13px]">Visible</Label></div></div>
+            <div className="h-px bg-border/60" />
             <SectionEditor content={sf.content} type={sf.section_type} onChange={c=>setSf({...sf,content:c})}/>
-            <div className="flex justify-end gap-2"><DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose><Button onClick={saveS} className="bg-primary hover:bg-primary/90">Save</Button></div>
           </div>}
+          <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+            <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+            <Button onClick={saveS} className="bg-primary hover:bg-primary/90 rounded-lg px-8">Save</Button>
+          </div>
         </DialogContent>
       </Dialog>
       {secs.length===0 ? <Card className="bg-card border-border"><CardContent className="p-8 text-center text-muted-foreground">No sections yet.</CardContent></Card> : (

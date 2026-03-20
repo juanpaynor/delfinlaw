@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RichEditor } from "@/components/admin/rich-editor";
 
 type FAQ = {
   id: string;
@@ -98,31 +99,52 @@ export default function FAQsAdmin() {
           <DialogTrigger asChild>
             <Button className="bg-primary hover:bg-primary/90"><Plus className="h-4 w-4 mr-2" />Add FAQ</Button>
           </DialogTrigger>
-          <DialogContent className="bg-card border-border max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="font-headline">{editingId ? "Edit" : "Add"} FAQ</DialogTitle>
+          <DialogContent className="bg-card border-border max-w-2xl w-[90vw] flex flex-col p-0">
+            <DialogHeader className="px-8 pt-6 pb-4 border-b border-border/60 shrink-0">
+              <DialogTitle className="font-headline text-xl">{editingId ? "Edit" : "Add"} FAQ</DialogTitle>
+              <p className="text-sm text-muted-foreground">Write a clear question and detailed answer.</p>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Question</Label>
-                <Input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="What is...?" className="bg-background" />
+
+            <div className="overflow-y-auto px-8 py-6 space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Question</h3>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Question</Label>
+                    <Input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} placeholder="What is...?" className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[13px]">Category</Label>
+                    <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="General, Billing, etc." className="bg-[#fafafa] border-border/60 h-10 rounded-lg" />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Answer</Label>
-                <Textarea value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} placeholder="Detailed answer..." className="bg-background" rows={5} />
+
+              <div className="h-px bg-border/60" />
+
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Answer</h3>
+                <RichEditor
+                  content={form.answer}
+                  onChange={(html) => setForm({ ...form, answer: html })}
+                  placeholder="Write a detailed answer..."
+                />
               </div>
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="General, Billing, etc." className="bg-background" />
-              </div>
-              <div className="flex items-center gap-2">
+
+              <div className="h-px bg-border/60" />
+
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <Label className="text-[13px]">Active</Label>
+                  <p className="text-[11px] text-muted-foreground/60">Show on public site</p>
+                </div>
                 <Switch checked={form.is_active} onCheckedChange={(checked) => setForm({ ...form, is_active: checked })} />
-                <Label>Active</Label>
               </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                <Button onClick={handleSave} className="bg-primary hover:bg-primary/90">{editingId ? "Update" : "Create"}</Button>
-              </div>
+            </div>
+
+            <div className="px-8 py-4 border-t border-border/60 shrink-0 flex justify-end gap-3">
+              <DialogClose asChild><Button variant="outline" className="rounded-lg">Cancel</Button></DialogClose>
+              <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 rounded-lg px-8">{editingId ? "Save Changes" : "Add FAQ"}</Button>
             </div>
           </DialogContent>
         </Dialog>

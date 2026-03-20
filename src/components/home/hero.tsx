@@ -1,11 +1,12 @@
 "use client";
 
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowDown } from 'lucide-react';
 import { ContactModal } from '@/components/contact-modal';
+import { cn } from '@/lib/utils';
 
 // Deterministic pseudo-random to avoid SSR hydration mismatch
 function seededRandom(seed: number) {
@@ -13,7 +14,6 @@ function seededRandom(seed: number) {
   return x - Math.floor(x);
 }
 
-// Pre-compute dots at module level — rounded to avoid hydration float mismatch
 const r = (n: number) => Math.round(n * 100) / 100;
 const dots = Array.from({ length: 20 }, (_, i) => ({
   id: i,
@@ -44,7 +44,27 @@ function FloatingDots() {
   );
 }
 
-export default function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
+type HeroSlide = { id: string; image_url: string };
+
+export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; backgroundUrl?: string }) {
+  const imageList = slides && slides.length > 0
+    ? slides.map(s => s.image_url)
+    : backgroundUrl ? [backgroundUrl] : [];
+
+  const [current, setCurrent] = useState(0);
+
+  const next = useCallback(() => {
+    if (imageList.length <= 1) return;
+    setCurrent((prev) => (prev + 1) % imageList.length);
+  }, [imageList.length]);
+
+  // Auto-cycle every 6 seconds
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+    const timer = setInterval(next, 6000);
+    return () => clearInterval(timer);
+  }, [next, imageList.length]);
+
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const x1 = useSpring(useTransform(mouseX, [-500, 500], [-12, 12]), { stiffness: 50, damping: 20 });
@@ -59,16 +79,27 @@ export default function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-primary" onMouseMove={handleMouseMove}>
-      {/* Background Image */}
-      {backgroundUrl && (
-        <Image
-          src={backgroundUrl}
-          alt="Hero background"
-          fill
-          className="object-cover"
-          priority
-        />
-      )}
+      {/* Background Carousel Images */}
+      <AnimatePresence mode="popLayout">
+        {imageList.length > 0 && (
+          <motion.div
+            key={current}
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+          >
+            <Image
+              src={imageList[current]}
+              alt={`Hero slide ${current + 1}`}
+              fill
+              className="object-cover"
+              priority={current === 0}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/60 z-[1]" />
@@ -130,6 +161,22 @@ export default function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
           </ContactModal>
         </motion.div>
       </div>
+
+      {/* Slide indicators */}
+      {imageList.length > 1 && (
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+          {imageList.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={cn(
+                "h-1 rounded-full transition-all duration-500",
+                current === i ? "w-8 bg-white" : "w-2 bg-white/40 hover:bg-white/60"
+              )}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Scroll indicator */}
       <motion.div

@@ -10,23 +10,25 @@ import {
   getTestimonials,
   getBlogPosts,
   getSiteSettings,
+  getHeroSlides,
 } from "@/lib/supabase-data";
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
 export default async function Home() {
-  const [practiceAreas, attorneys, testimonials, blogPosts, settings] = await Promise.all([
+  const [practiceAreas, attorneys, testimonials, blogPosts, settings, heroSlides] = await Promise.all([
     getPracticeAreas(),
     getAttorneys(),
     getTestimonials(),
     getBlogPosts(),
     getSiteSettings(),
+    getHeroSlides(),
   ]);
 
   return (
     <>
       <ScrollProgress />
-      <Hero backgroundUrl={settings.hero_image_url} />
+      <Hero slides={heroSlides} backgroundUrl={settings.hero_image_url} />
       <PracticeAreas items={practiceAreas} />
       <Testimonials items={testimonials} />
       <Attorneys items={attorneys} />

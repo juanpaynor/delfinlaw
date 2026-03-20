@@ -58,6 +58,13 @@ export type DBSiteSetting = {
   group_name: string;
 };
 
+export type DBHeroSlide = {
+  id: string;
+  image_url: string;
+  display_order: number;
+  is_active: boolean;
+};
+
 export async function getPracticeAreas(): Promise<DBPracticeArea[]> {
   const { data, error } = await supabase
     .from('practice_areas')
@@ -106,6 +113,16 @@ export async function getSiteSettings(): Promise<Record<string, string>> {
   const map: Record<string, string> = {};
   (data ?? []).forEach(s => { map[s.key] = s.value; });
   return map;
+}
+
+export async function getHeroSlides(): Promise<DBHeroSlide[]> {
+  const { data, error } = await supabase
+    .from('hero_slides')
+    .select('id, image_url, display_order, is_active')
+    .eq('is_active', true)
+    .order('display_order');
+  if (error) { console.error('Error fetching hero slides:', error); return []; }
+  return data ?? [];
 }
 
 export async function getAttorneyBySlug(slug: string): Promise<DBAttorney | null> {

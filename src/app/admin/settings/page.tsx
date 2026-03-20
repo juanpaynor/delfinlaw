@@ -52,9 +52,13 @@ export default function SettingsAdmin() {
       supabase.from("site_settings").update({ value }).eq("key", key)
     );
     await Promise.all(updates);
+
+    // Re-fetch to get the latest values
+    const { data: s } = await supabase.from("site_settings").select("*").order("key");
+    setSettings(s ?? []);
     setEdited({});
     setSaving(false);
-    toast({ title: "Saved", description: "Settings updated successfully." });
+    toast({ title: "Saved", description: "Settings updated. Changes will appear on the site within 60 seconds." });
   };
 
   const handleToggleSection = async (id: string, is_visible: boolean) => {

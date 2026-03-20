@@ -11,13 +11,12 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }) {
   const settings = await getSiteSettings();
-  const logoUrl = settings.logo_url || undefined;
 
   return (
     <>
-      <Header logoUrl={logoUrl} />
+      <Header logoUrl={settings.logo_url || undefined} />
       <main>{children}</main>
-      <Footer logoUrl={logoUrl} />
+      <Footer settings={settings} />
       <Toaster />
     </>
   );

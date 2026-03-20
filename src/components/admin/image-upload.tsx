@@ -7,7 +7,7 @@ import { Upload, X, Loader2, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ImageUploadProps {
-  folder: "attorneys" | "blog" | "branding" | "pages";
+  folder: "attorneys" | "blog" | "branding" | "pages" | "hero";
   currentUrl?: string;
   onUpload: (url: string) => void;
   onRemove?: () => void;

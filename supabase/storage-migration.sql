@@ -42,3 +42,25 @@ ON CONFLICT (key) DO NOTHING;
 INSERT INTO site_settings (key, value, group_name)
 VALUES ('hero_image_url', '', 'branding')
 ON CONFLICT (key) DO NOTHING;
+
+-- 7. Add location settings for map
+INSERT INTO site_settings (key, value, group_name)
+VALUES ('office_latitude', '14.5995', 'contact')
+ON CONFLICT (key) DO NOTHING;
+
+INSERT INTO site_settings (key, value, group_name)
+VALUES ('office_longitude', '120.9842', 'contact')
+ON CONFLICT (key) DO NOTHING;
+
+-- 8. Add about page settings
+INSERT INTO site_settings (key, value, group_name)
+VALUES ('mission', '', 'about')
+ON CONFLICT (key) DO NOTHING;
+
+INSERT INTO site_settings (key, value, group_name)
+VALUES ('vision', '', 'about')
+ON CONFLICT (key) DO NOTHING;
+
+INSERT INTO site_settings (key, value, group_name)
+VALUES ('firm_history', '', 'about')
+ON CONFLICT (key) DO NOTHING;

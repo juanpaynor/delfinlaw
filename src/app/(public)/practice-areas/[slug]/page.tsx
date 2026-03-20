@@ -44,10 +44,10 @@ export default async function PracticeAreaDetailPage({ params }: { params: Promi
         <h1 className="font-headline text-4xl md:text-5xl font-bold text-foreground">{area.name}</h1>
         <div className="h-[3px] w-16 bg-accent mt-6 mb-8" />
 
-        <p className="text-lg text-muted-foreground leading-relaxed">{area.short_description}</p>
+        <p className="text-lg text-muted-foreground leading-relaxed text-justify">{area.short_description}</p>
 
         {area.long_description && (
-          <div className="mt-8 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary">
+          <div className="mt-8 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary text-justify">
             {area.long_description.split('\n').map((paragraph, i) => (
               paragraph.trim() ? <p key={i}>{paragraph}</p> : null
             ))}

@@ -10,6 +10,9 @@ import { Switch } from "@/components/ui/switch";
 import { GripVertical, Save } from "lucide-react";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { useToast } from "@/hooks/use-toast";
+import dynamic from "next/dynamic";
+
+const MapPicker = dynamic(() => import("@/components/admin/map-picker").then(m => ({ default: m.MapPicker })), { ssr: false, loading: () => <div className="h-[300px] bg-muted rounded-lg animate-pulse" /> });
 
 type Setting = { id: string; key: string; value: string; group_name: string };
 type HSect = { id: string; section_key: string; label: string; is_visible: boolean; display_order: number };
@@ -21,10 +24,17 @@ const settingLabels: Record<string, string> = {
   twitter_url: "Twitter URL", linkedin_url: "LinkedIn URL",
   facebook_url: "Facebook URL", instagram_url: "Instagram URL",
   logo_url: "Logo", hero_image_url: "Hero Background Image",
+  office_latitude: "Latitude", office_longitude: "Longitude",
+  mission: "Mission Statement", vision: "Vision Statement", firm_history: "Firm History / Our Story",
 };
 
+// Settings rendered as map picker or image upload, not as text inputs
+const hiddenFromInputs = ['office_latitude', 'office_longitude'];
+const imageSettings = ['logo_url', 'hero_image_url'];
+const textareaSettings = ['mission', 'vision', 'firm_history', 'firm_description'];
+
 const groupLabels: Record<string, string> = {
-  general: "General", contact: "Contact Information", social: "Social Media", branding: "Branding",
+  general: "General", contact: "Contact Information", social: "Social Media", branding: "Branding", about: "About Page",
 };
 
 export default function SettingsAdmin() {
@@ -100,14 +110,24 @@ export default function SettingsAdmin() {
             <CardTitle className="font-headline text-lg">{groupLabels[group] || group}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {items.map((setting) =>
-              setting.key === 'logo_url' || setting.key === 'hero_image_url' ? (
+            {items.filter(s => !hiddenFromInputs.includes(s.key)).map((setting) =>
+              imageSettings.includes(setting.key) ? (
                 <div key={setting.key} className="space-y-1">
                   <Label className="text-sm">{settingLabels[setting.key] || setting.key}</Label>
                   <ImageUpload
                     folder="branding"
                     currentUrl={edited[setting.key] ?? setting.value}
                     onUpload={(url) => setEdited({ ...edited, [setting.key]: url })}
+                  />
+                </div>
+              ) : textareaSettings.includes(setting.key) ? (
+                <div key={setting.key} className="space-y-1">
+                  <Label className="text-sm">{settingLabels[setting.key] || setting.key}</Label>
+                  <textarea
+                    value={edited[setting.key] ?? setting.value}
+                    onChange={(e) => setEdited({ ...edited, [setting.key]: e.target.value })}
+                    className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    rows={4}
                   />
                 </div>
               ) : (
@@ -124,6 +144,21 @@ export default function SettingsAdmin() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Map Picker */}
+      <Card className="bg-card border-border">
+        <CardHeader>
+          <CardTitle className="font-headline text-lg">Office Location</CardTitle>
+          <p className="text-sm text-muted-foreground">Search for your address and click on the map to set a pin</p>
+        </CardHeader>
+        <CardContent>
+          <MapPicker
+            lat={parseFloat(edited.office_latitude ?? settings.find(s => s.key === 'office_latitude')?.value ?? '14.5995') || 14.5995}
+            lng={parseFloat(edited.office_longitude ?? settings.find(s => s.key === 'office_longitude')?.value ?? '120.9842') || 120.9842}
+            onChange={(lat, lng) => setEdited({ ...edited, office_latitude: lat.toString(), office_longitude: lng.toString() })}
+          />
+        </CardContent>
+      </Card>
 
       <Card className="bg-card border-border">
         <CardHeader>

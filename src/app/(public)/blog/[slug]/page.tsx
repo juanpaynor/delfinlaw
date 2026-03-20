@@ -61,7 +61,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
 
         {/* Excerpt */}
         {post.excerpt && (
-          <p className="text-lg text-muted-foreground mt-4 leading-relaxed">{post.excerpt}</p>
+          <p className="text-lg text-muted-foreground mt-4 leading-relaxed text-justify">{post.excerpt}</p>
         )}
 
         {/* Cover Image */}
@@ -78,7 +78,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
         )}
 
         {/* Content */}
-        <div className="mt-10 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary">
+        <div className="mt-10 prose prose-neutral dark:prose-invert max-w-none prose-headings:font-headline prose-a:text-secondary text-justify">
           {post.content ? (
             post.content.split('\n').map((paragraph, i) => (
               paragraph.trim() ? <p key={i}>{paragraph}</p> : null

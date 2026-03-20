@@ -64,7 +64,7 @@ function FlipTiltCard({ area, index }: { area: DBPracticeArea; index: number }) 
             <Icon className="h-5 w-5 text-accent" />
             <h3 className="font-headline text-base font-bold">{area.name}</h3>
           </div>
-          <p className="text-sm leading-relaxed opacity-90">{area.short_description}</p>
+          <p className="text-sm leading-relaxed opacity-90 text-justify">{area.short_description}</p>
         </div>
         <Link href={`/practice-areas/${area.slug}`} className="text-accent text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all mt-3">
           Learn more →

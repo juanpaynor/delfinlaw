@@ -4,6 +4,7 @@ import Logo from '@/components/logo';
 import { navigationLinks } from '@/lib/data';
 import { ContactModal } from '@/components/contact-modal';
 import { Button } from '@/components/ui/button';
+import FooterMapWrapper from '@/components/footer-map-wrapper';
 
 interface FooterProps {
   settings: Record<string, string>;
@@ -18,6 +19,9 @@ export default function Footer({ settings }: FooterProps) {
   const phone = settings.phone || '';
   const email = settings.email || '';
   const logoUrl = settings.logo_url || undefined;
+  const lat = parseFloat(settings.office_latitude) || 0;
+  const lng = parseFloat(settings.office_longitude) || 0;
+  const hasLocation = lat !== 0 && lng !== 0;
 
   return (
     <footer id="contact" className="bg-card border-t border-border">
@@ -28,8 +32,8 @@ export default function Footer({ settings }: FooterProps) {
             <Link href="/" className="inline-block">
               <Logo logoUrl={logoUrl} />
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              {tagline} {description}
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs line-clamp-3 text-justify">
+              {tagline}
             </p>
           </div>
 
@@ -89,6 +93,17 @@ export default function Footer({ settings }: FooterProps) {
             </ContactModal>
           </div>
         </div>
+
+        {/* Map */}
+        {hasLocation && (
+          <div className="mt-10">
+            <FooterMapWrapper
+              lat={lat}
+              lng={lng}
+              address={[addressLine1, addressLine2].filter(Boolean).join(', ')}
+            />
+          </div>
+        )}
 
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-2">
           <p className="text-xs text-muted-foreground">

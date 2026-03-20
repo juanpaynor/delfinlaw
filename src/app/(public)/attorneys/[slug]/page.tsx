@@ -104,7 +104,7 @@ export default async function AttorneyDetailPage({ params }: { params: Promise<{
             {/* Bio */}
             <div>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">About</h2>
-              <p className="text-foreground/80 leading-relaxed text-[17px]">{attorney.bio}</p>
+              <p className="text-foreground/80 leading-relaxed text-[17px] text-justify">{attorney.bio}</p>
             </div>
 
             {/* Education */}

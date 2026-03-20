@@ -44,7 +44,7 @@ export default function Testimonials({ items }: { items: DBTestimonial[] }) {
                     <Star key={i} className="h-5 w-5 text-accent fill-accent" />
                   ))}
                 </div>
-                <blockquote className="text-lg md:text-xl font-headline italic text-foreground leading-relaxed">
+                <blockquote className="text-lg md:text-xl font-headline italic text-foreground leading-relaxed text-justify">
                   &ldquo;{items[active].quote}&rdquo;
                 </blockquote>
                 <div className="mt-8">

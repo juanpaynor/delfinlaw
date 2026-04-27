@@ -2,49 +2,32 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ContactModal } from '@/components/contact-modal';
 import { cn } from '@/lib/utils';
 
-// Deterministic pseudo-random to avoid SSR hydration mismatch
-function seededRandom(seed: number) {
-  const x = Math.sin(seed + 1) * 10000;
-  return x - Math.floor(x);
-}
+type HeroSlide = { id: string; image_url: string };
 
-const r = (n: number) => Math.round(n * 100) / 100;
-const dots = Array.from({ length: 20 }, (_, i) => ({
-  id: i,
-  x: r(seededRandom(i * 3) * 100),
-  y: r(seededRandom(i * 3 + 1) * 100),
-  size: r(3 + seededRandom(i * 3 + 2) * 5),
-  duration: r(15 + seededRandom(i * 7) * 20),
-  delay: r(seededRandom(i * 11) * 10),
-}));
-
-function FloatingDots() {
+// Staggered letter animation for the firm name
+function AnimatedWord({ word, delay = 0, className }: { word: string; delay?: number; className?: string }) {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[2]">
-      {dots.map((d) => (
-        <motion.div
-          key={d.id}
-          className="absolute rounded-full bg-white/10"
-          style={{ left: `${d.x}%`, top: `${d.y}%`, width: d.size, height: d.size }}
-          animate={{
-            y: [0, -40, 0],
-            x: [0, Math.sin(d.id) * 20, 0],
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{ duration: d.duration, repeat: Infinity, delay: d.delay, ease: "easeInOut" }}
-        />
+    <span className={cn("inline-flex overflow-hidden", className)}>
+      {word.split('').map((char, i) => (
+        <motion.span
+          key={i}
+          className="inline-block"
+          initial={{ y: '110%', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, delay: delay + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {char}
+        </motion.span>
       ))}
-    </div>
+    </span>
   );
 }
-
-type HeroSlide = { id: string; image_url: string };
 
 export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; backgroundUrl?: string }) {
   const imageList = slides && slides.length > 0
@@ -58,37 +41,30 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
     setCurrent((prev) => (prev + 1) % imageList.length);
   }, [imageList.length]);
 
-  // Auto-cycle every 6 seconds
+  const prev = () => {
+    if (imageList.length <= 1) return;
+    setCurrent((prev) => (prev - 1 + imageList.length) % imageList.length);
+  };
+
   useEffect(() => {
     if (imageList.length <= 1) return;
-    const timer = setInterval(next, 6000);
+    const timer = setInterval(next, 7000);
     return () => clearInterval(timer);
   }, [next, imageList.length]);
 
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const x1 = useSpring(useTransform(mouseX, [-500, 500], [-12, 12]), { stiffness: 50, damping: 20 });
-  const y1 = useSpring(useTransform(mouseY, [-300, 300], [-6, 6]), { stiffness: 50, damping: 20 });
-  const x2 = useSpring(useTransform(mouseX, [-500, 500], [8, -8]), { stiffness: 50, damping: 20 });
-  const y2 = useSpring(useTransform(mouseY, [-300, 300], [4, -4]), { stiffness: 50, damping: 20 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    mouseX.set(e.clientX - window.innerWidth / 2);
-    mouseY.set(e.clientY - window.innerHeight / 2);
-  };
-
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-primary" onMouseMove={handleMouseMove}>
-      {/* Background Carousel Images */}
+    <section className="relative h-screen w-full overflow-hidden bg-primary group">
+
+      {/* ── Full-bleed background carousel ── */}
       <AnimatePresence mode="popLayout">
         {imageList.length > 0 && (
           <motion.div
             key={current}
             className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={{ opacity: 0, scale: 1.08 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 1.4, ease: 'easeInOut' }}
           >
             <Image
               src={imageList[current]}
@@ -101,92 +77,114 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
         )}
       </AnimatePresence>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60 z-[1]" />
+      {/* ── Gradient overlays ── */}
+      {/* Top vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-transparent z-[1]" />
+      {/* Bottom gradient — where text lives */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-[1]" />
 
-      <FloatingDots />
+      {/* ── Prev / Next arrows ── */}
+      {imageList.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-5 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/20
+                       bg-white/5 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100
+                       transition-all duration-300 hover:bg-white/15"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-5 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full border border-white/20
+                       bg-white/5 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100
+                       transition-all duration-300 hover:bg-white/15"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      )}
 
-      <div className="relative z-10 h-full w-full flex flex-col items-center justify-center px-4">
-        {/* DELFIN */}
-        <motion.h1
-          className="font-seasons font-bold text-[16vw] md:text-[12vw] uppercase leading-[0.85] text-white select-none"
-          style={{ x: x1, y: y1 }}
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4 }}
-        >
-          DELFIN
-        </motion.h1>
+      {/* ── Top-right: slide progress bar ── */}
+      {imageList.length > 1 && (
+        <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-2">
+          <span className="text-white/50 text-xs font-mono tabular-nums tracking-widest">
+            {String(current + 1).padStart(2, '0')} <span className="text-white/25">/</span> {String(imageList.length).padStart(2, '0')}
+          </span>
+          <div className="flex gap-1">
+            {imageList.map((_, i) => (
+              <button key={i} onClick={() => setCurrent(i)} className="relative h-[2px] w-8 bg-white/20 overflow-hidden rounded-full">
+                {i === current && (
+                  <motion.div
+                    className="absolute inset-y-0 left-0 bg-accent rounded-full"
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 7, ease: 'linear' }}
+                    key={current}
+                  />
+                )}
+                {i !== current && (
+                  <div className={cn("absolute inset-0 rounded-full", i < current ? "bg-white/60" : "bg-white/20")} />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {/* Clean divider line */}
-        <motion.div
-          className="h-[2px] bg-accent my-3"
-          initial={{ width: 0 }}
-          animate={{ width: "30vw" }}
-          transition={{ duration: 1, delay: 0.8, ease: [0.25, 0.4, 0.25, 1] as const }}
-        />
+      {/* ── Bottom content ── */}
+      <div className="absolute bottom-0 inset-x-0 z-10 px-6 pb-10 md:px-14 md:pb-12 lg:px-20">
 
-        {/* LAW */}
-        <motion.h1
-          className="font-seasons font-bold text-[20vw] md:text-[14vw] uppercase leading-[0.85] text-white select-none"
-          style={{ x: x2, y: y2 }}
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.6 }}
-        >
-          LAW
-        </motion.h1>
-
-        {/* Tagline */}
+        {/* Eyebrow */}
         <motion.p
-          className="text-sm text-white/70 tracking-[0.25em] uppercase mt-5 text-center"
-          initial={{ opacity: 0, y: 20 }}
+          className="text-xs text-white/50 tracking-[0.35em] uppercase mb-4"
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
         >
-          Where Legal Expertise Meets Local Insight
+          Law Firm · Roxas City, Capiz
         </motion.p>
 
-        {/* CTA */}
+        {/* Firm name */}
+        <div className="flex items-end gap-4 md:gap-6 mb-4">
+          <h1 className="font-seasons text-[18vw] sm:text-[14vw] md:text-[11vw] lg:text-[9vw] uppercase leading-[0.8] text-white">
+            <AnimatedWord word="DELFIN" delay={0.4} />
+          </h1>
+          {/* Vertical gold bar accent */}
+          <motion.div
+            className="hidden md:block w-[3px] bg-accent self-stretch mb-1"
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: 1 }}
+            transition={{ duration: 0.7, delay: 0.9, ease: [0.16, 1, 0.3, 1], transformOrigin: 'bottom' }}
+          />
+          <h1 className="font-seasons text-[18vw] sm:text-[14vw] md:text-[11vw] lg:text-[9vw] uppercase leading-[0.8] text-white">
+            <AnimatedWord word="LAW" delay={0.6} />
+          </h1>
+        </div>
+
+        {/* Divider + tagline + CTA row */}
         <motion.div
-          className="mt-10"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.4 }}
+          className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8 pt-4 border-t border-white/15"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
         >
+          <p className="text-4xl md:text-5xl font-seasons text-white/90 max-w-2xl leading-snug">
+            Where Legal Expertise Meets Local Insight
+          </p>
           <ContactModal>
-            <Button size="lg" className="bg-white hover:bg-white/90 text-primary rounded-lg px-8 py-6 text-base font-semibold">
+            <Button
+              size="lg"
+              className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-none
+                         px-8 py-5 text-xs font-semibold tracking-[0.2em] uppercase sm:ml-auto"
+            >
               Get in Touch
             </Button>
           </ContactModal>
         </motion.div>
       </div>
-
-      {/* Slide indicators */}
-      {imageList.length > 1 && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-          {imageList.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={cn(
-                "h-1 rounded-full transition-all duration-500",
-                current === i ? "w-8 bg-white" : "w-2 bg-white/40 hover:bg-white/60"
-              )}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, y: [0, 6, 0] }}
-        transition={{ opacity: { delay: 2 }, y: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
-      >
-        <ArrowDown className="w-4 h-4 text-white/50" />
-      </motion.div>
     </section>
   );
 }
+
+

@@ -107,19 +107,9 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
       <FloatingDots />
 
       <div className="relative z-10 h-full w-full flex flex-col items-center justify-center px-4">
-        {/* Subtitle */}
-        <motion.p
-          className="text-sm text-white/60 tracking-[0.3em] uppercase mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Advocates for Justice & Growth
-        </motion.p>
-
         {/* DELFIN */}
         <motion.h1
-          className="font-headline font-black text-[16vw] md:text-[12vw] uppercase leading-[0.85] text-white select-none"
+          className="font-seasons font-bold text-[16vw] md:text-[12vw] uppercase leading-[0.85] text-white select-none"
           style={{ x: x1, y: y1 }}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -138,7 +128,7 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
 
         {/* LAW */}
         <motion.h1
-          className="font-headline font-black text-[20vw] md:text-[14vw] uppercase leading-[0.85] text-white select-none"
+          className="font-seasons font-bold text-[20vw] md:text-[14vw] uppercase leading-[0.85] text-white select-none"
           style={{ x: x2, y: y2 }}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -147,12 +137,22 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
           LAW
         </motion.h1>
 
-        {/* CTA */}
-        <motion.div
-          className="mt-12"
+        {/* Tagline */}
+        <motion.p
+          className="text-sm text-white/70 tracking-[0.25em] uppercase mt-5 text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.2 }}
+          transition={{ duration: 0.8, delay: 1.0 }}
+        >
+          Where Legal Expertise Meets Local Insight
+        </motion.p>
+
+        {/* CTA */}
+        <motion.div
+          className="mt-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.4 }}
         >
           <ContactModal>
             <Button size="lg" className="bg-white hover:bg-white/90 text-primary rounded-lg px-8 py-6 text-base font-semibold">

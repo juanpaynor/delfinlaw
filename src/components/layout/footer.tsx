@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, MapPin, Phone, Facebook } from 'lucide-react';
 import Logo from '@/components/logo';
 import { navigationLinks } from '@/lib/data';
 import { ContactModal } from '@/components/contact-modal';
@@ -11,12 +11,13 @@ interface FooterProps {
 }
 
 export default function Footer({ settings }: FooterProps) {
-  const firmName = settings.firm_name || 'Delfin Law Advocates';
-  const tagline = settings.firm_tagline || 'Expert legal counsel for modern challenges.';
+  const firmName = settings.firm_name || 'Delfin Law Office';
+  const tagline = settings.firm_tagline || 'Where Legal Expertise Meets Local Insight.';
   const description = settings.firm_description || 'Trusted advocacy you can rely on.';
   const addressLine1 = settings.address_line1 || '';
   const addressLine2 = settings.address_line2 || '';
   const phone = settings.phone || '';
+  const mobile = settings.mobile || '';
   const email = settings.email || '';
   const logoUrl = settings.logo_url || undefined;
   const lat = parseFloat(settings.office_latitude) || 0;
@@ -52,10 +53,13 @@ export default function Footer({ settings }: FooterProps) {
                 </p>
               )}
               {phone && (
-                <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-2 hover:text-foreground transition-colors">
-                  <Phone className="h-4 w-4 text-secondary" />
-                  {phone}
-                </a>
+                <p className="flex items-start gap-2">
+                  <Phone className="h-4 w-4 mt-0.5 text-secondary shrink-0" />
+                  <span>
+                    <span className="block">Tel: <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="hover:text-foreground transition-colors">{phone}</a></span>
+                    {mobile && <span className="block">Mobile: {mobile}</span>}
+                  </span>
+                </p>
               )}
               {email && (
                 <a href={`mailto:${email}`} className="flex items-center gap-2 hover:text-foreground transition-colors">
@@ -91,6 +95,18 @@ export default function Footer({ settings }: FooterProps) {
                 Get in Touch
               </Button>
             </ContactModal>
+            <div className="pt-2">
+              <h4 className="text-sm font-semibold text-foreground mb-3">Follow Us</h4>
+              <a
+                href="https://www.facebook.com/delfinlaw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Facebook className="h-4 w-4 text-[#1877F2]" />
+                Delfin Law Office
+              </a>
+            </div>
           </div>
         </div>
 

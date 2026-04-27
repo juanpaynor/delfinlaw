@@ -8,10 +8,10 @@ export const revalidate = 60;
 export default async function AboutPage() {
   const settings = await getSiteSettings();
 
-  const firmName = settings.firm_name || 'Delfin Law Advocates';
-  const mission = settings.mission || 'To provide exceptional, client-centered legal services that empower individuals and businesses to navigate complex legal challenges with confidence and clarity.';
-  const vision = settings.vision || 'To be the most trusted and respected law firm in the region, recognized for our unwavering commitment to justice, innovation in legal practice, and the lasting impact we create for our clients and communities.';
-  const firmHistory = settings.firm_history || '';
+  const firmName = settings.firm_name || 'Delfin Law Office';
+  const mission = settings.mission || 'At Delfin Law Office, our mission is to integrate legal expertise with local insight to deliver strategic, practical, and cost-effective legal solutions. Our practice is built on a strong client-first foundation, and we strive to be a trusted partner to our clients — providing sound guidance to commercial industries, offering strong and principled advocacy in litigation, and delivering legal services that are a cut above the rest.';
+  const vision = settings.vision || 'To be the law firm of choice in Western Visayas for businesses seeking to grow and build lasting enterprises, and for individuals in need of principled and effective representation in litigation. We aim to be recognized for unparalleled work ethic, sound legal counsel, and unwavering professional integrity, while contributing to the continued growth of Western Visayas as a thriving hub for commerce and enterprise.';
+  const firmHistory = settings.firm_history || 'Delfin Law Office is a full-service law firm based in Roxas City, Capiz, an emerging economic hub in Western Visayas. Strategically located in one of the region\'s growing commercial centers, the firm provides legal services that combine modern legal expertise, top-tier legal training, and a deep understanding of the local business and community landscape.\n\nThe firm\'s mission is to support the continued growth of local enterprises, professionals, and emerging businesses across Capiz and the broader Western Visayas region. At the same time, we provide comprehensive legal services across a wide range of practice areas, including corporate housekeeping, regulatory compliance, real estate, dispute resolution, general litigation, and criminal defense — offering clients practical, strategic, and results-oriented representation.';
 
   return (
     <div className="min-h-screen bg-background">

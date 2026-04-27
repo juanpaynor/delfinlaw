@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Delfin Law Advocates',
-  description: 'Expert Legal Counsel for Modern Challenges. Delfin Law Advocates provides top-tier legal services across a range of practice areas, combining experience with a client-focused approach.',
+  title: 'Delfin Law Office',
+  description: 'Where Legal Expertise Meets Local Insight. Delfin Law Office is a full-service law firm based in Roxas City, Capiz, providing strategic, practical, and results-oriented legal representation.',
 };
 
 export default function RootLayout({

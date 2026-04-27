@@ -12,6 +12,7 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['"Playfair Display"', 'serif'],
+        seasons: ['"The Seasons"', 'serif'],
         code: ['monospace'],
       },
       colors: {

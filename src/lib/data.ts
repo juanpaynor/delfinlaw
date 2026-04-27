@@ -2,11 +2,12 @@ import type { LucideIcon } from 'lucide-react';
 import { Users, Building2, Home, HeartHandshake, Briefcase, NotebookText, Gavel } from 'lucide-react';
 
 export const navigationLinks = [
-  { name: 'About', href: '/about' },
+  { name: 'About', href: '#about' },
   { name: 'Practice Areas', href: '#practice-areas' },
   { name: 'Testimonials', href: '#testimonials' },
   { name: 'Our Lawyers', href: '#attorneys' },
   { name: 'Blog', href: '#blog' },
+  { name: 'Location', href: '#location' },
   { name: 'Contact', href: '#contact' },
 ];
 

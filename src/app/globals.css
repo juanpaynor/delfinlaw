@@ -2,21 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* The Seasons — place font files in /public/fonts/ */
+/* The Seasons */
 @font-face {
   font-family: 'The Seasons';
-  src: url('/fonts/the-seasons.woff2') format('woff2'),
-       url('/fonts/the-seasons.woff') format('woff');
-  font-weight: normal;
+  src: url('/fonts/The Seasons Regular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'The Seasons';
-  src: url('/fonts/the-seasons-bold.woff2') format('woff2'),
-       url('/fonts/the-seasons-bold.woff') format('woff');
-  font-weight: bold;
+  src: url('/fonts/The Seasons Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'The Seasons';
+  src: url('/fonts/The Seasons Bold.ttf') format('truetype');
+  font-weight: 700;
   font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'The Seasons';
+  src: url('/fonts/The Seasons Bold Italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'The Seasons';
+  src: url('/fonts/The Seasons Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'The Seasons';
+  src: url('/fonts/The Seasons Light Italic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
   font-display: swap;
 }
 

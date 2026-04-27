@@ -11,7 +11,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['"Playfair Display"', 'serif'],
+        headline: ['"The Seasons"', 'serif'],
         seasons: ['"The Seasons"', 'serif'],
         code: ['monospace'],
       },

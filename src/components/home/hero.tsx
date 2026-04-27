@@ -53,7 +53,7 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
   }, [next, imageList.length]);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-primary group">
+    <section className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-primary group">
 
       {/* ── Full-bleed background carousel ── */}
       <AnimatePresence mode="popLayout">
@@ -133,7 +133,7 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
       )}
 
       {/* ── Bottom content ── */}
-      <div className="absolute bottom-0 inset-x-0 z-10 px-6 pb-10 md:px-14 md:pb-12 lg:px-20">
+      <div className="absolute bottom-0 inset-x-0 z-10 px-5 pb-8 md:px-14 md:pb-12 lg:px-20">
 
         {/* Eyebrow */}
         <motion.p
@@ -146,8 +146,8 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
         </motion.p>
 
         {/* Firm name */}
-        <div className="flex items-end gap-4 md:gap-6 mb-4">
-          <h1 className="font-seasons text-[18vw] sm:text-[14vw] md:text-[11vw] lg:text-[9vw] uppercase leading-[0.8] text-white">
+        <div className="flex items-end gap-3 md:gap-6 mb-3 md:mb-4">
+          <h1 className="font-seasons text-[16vw] sm:text-[13vw] md:text-[11vw] lg:text-[9vw] uppercase leading-[0.85] text-white">
             <AnimatedWord word="DELFIN" delay={0.4} />
           </h1>
           {/* Vertical gold bar accent */}
@@ -157,7 +157,7 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
             animate={{ scaleY: 1 }}
             transition={{ duration: 0.7, delay: 0.9, ease: [0.16, 1, 0.3, 1], transformOrigin: 'bottom' }}
           />
-          <h1 className="font-seasons text-[18vw] sm:text-[14vw] md:text-[11vw] lg:text-[9vw] uppercase leading-[0.8] text-white">
+          <h1 className="font-seasons text-[16vw] sm:text-[13vw] md:text-[11vw] lg:text-[9vw] uppercase leading-[0.85] text-white">
             <AnimatedWord word="LAW" delay={0.6} />
           </h1>
         </div>
@@ -169,7 +169,7 @@ export default function Hero({ slides, backgroundUrl }: { slides?: HeroSlide[]; 
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.2 }}
         >
-          <p className="text-4xl md:text-5xl font-seasons text-white/90 max-w-2xl leading-snug">
+          <p className="text-2xl sm:text-3xl md:text-5xl font-seasons text-white/90 max-w-2xl leading-snug">
             Where Legal Expertise Meets Local Insight
           </p>
           <ContactModal>

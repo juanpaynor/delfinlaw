@@ -115,6 +115,22 @@ export async function getSiteSettings(): Promise<Record<string, string>> {
   return map;
 }
 
+export type DBHomepageSection = {
+  section_key: string;
+  label: string;
+  is_visible: boolean;
+  display_order: number;
+};
+
+export async function getHomepageSections(): Promise<DBHomepageSection[]> {
+  const { data, error } = await supabase
+    .from('homepage_sections')
+    .select('section_key, label, is_visible, display_order')
+    .order('display_order');
+  if (error) { console.error('Error fetching homepage sections:', error); return []; }
+  return data ?? [];
+}
+
 export async function getHeroSlides(): Promise<DBHeroSlide[]> {
   const { data, error } = await supabase
     .from('hero_slides')

@@ -7,11 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import Logo from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { navigationLinks } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { ContactModal } from '@/components/contact-modal';
 
-export default function Header({ logoUrl }: { logoUrl?: string }) {
+export default function Header({ logoUrl, navLinks = [] }: { logoUrl?: string; navLinks?: { name: string; href: string }[] }) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export default function Header({ logoUrl }: { logoUrl?: string }) {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          {navigationLinks.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
@@ -71,7 +70,7 @@ export default function Header({ logoUrl }: { logoUrl?: string }) {
                 </SheetClose>
               </div>
               <nav className="flex flex-col gap-4 flex-1">
-                {navigationLinks.map((link) => (
+                {navLinks.map((link) => (
                   <SheetClose asChild key={link.name}>
                     <Link href={link.href} className="text-lg text-foreground hover:text-primary transition-colors">
                       {link.name}

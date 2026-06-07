@@ -5,15 +5,19 @@ import { supabase } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { MailOpen, Mail, CalendarDays, MessageSquare, ExternalLink } from "lucide-react";
+import { MailOpen, Mail, CalendarDays, MessageSquare, ExternalLink, Pencil, Send, Reply } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 type Reply = {
   id: string;
@@ -28,11 +32,18 @@ type Reply = {
   received_at: string;
 };
 
+type ComposeState = { to: string; subject: string; body: string };
+const EMPTY_COMPOSE: ComposeState = { to: "", subject: "", body: "" };
+
 export default function InboxAdmin() {
   const [replies, setReplies] = useState<Reply[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Reply | null>(null);
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [compose, setCompose] = useState<ComposeState>(EMPTY_COMPOSE);
+  const [sending, setSending] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     load();
@@ -61,6 +72,37 @@ export default function InboxAdmin() {
   async function markAllRead() {
     await supabase.from("email_replies").update({ is_read: true }).eq("is_read", false);
     setReplies((prev) => prev.map((r) => ({ ...r, is_read: true })));
+  }
+
+  function openCompose(prefill?: Partial<ComposeState>) {
+    setCompose({ ...EMPTY_COMPOSE, ...prefill });
+    setComposeOpen(true);
+  }
+
+  function openReplyCompose(reply: Reply) {
+    openCompose({
+      to: reply.from_email,
+      subject: reply.subject.startsWith("Re:") ? reply.subject : `Re: ${reply.subject}`,
+    });
+  }
+
+  async function handleSend() {
+    if (!compose.to || !compose.subject || !compose.body) {
+      toast({ title: "Missing fields", description: "Fill in all fields before sending.", variant: "destructive" });
+      return;
+    }
+    setSending(true);
+    const { error } = await supabase.functions.invoke("compose-email", {
+      body: { to: compose.to, subject: compose.subject, body_text: compose.body },
+    });
+    setSending(false);
+    if (error) {
+      toast({ title: "Failed to send", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Email sent ✓", description: `Message delivered to ${compose.to}` });
+      setComposeOpen(false);
+      setCompose(EMPTY_COMPOSE);
+    }
   }
 
   const filtered = filter === "unread" ? replies.filter((r) => !r.is_read) : replies;
@@ -103,6 +145,14 @@ export default function InboxAdmin() {
               Mark all read
             </Button>
           )}
+          <Button
+            size="sm"
+            className="bg-primary hover:bg-primary/90 ml-1"
+            onClick={() => openCompose()}
+          >
+            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+            Compose
+          </Button>
         </div>
       </div>
 
@@ -226,6 +276,18 @@ export default function InboxAdmin() {
                 </div>
               )}
 
+              {/* Reply button */}
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => openReplyCompose(selected)}
+                >
+                  <Reply className="h-3.5 w-3.5 mr-1.5" />
+                  Reply
+                </Button>
+              </div>
+
               {/* Body */}
               <div className="border border-border rounded-lg overflow-hidden">
                 {selected.body_html ? (
@@ -243,6 +305,62 @@ export default function InboxAdmin() {
               </div>
             </div>
           )}
+      </DialogContent>
+        </Dialog>
+
+      {/* Compose / Reply dialog */}
+      <Dialog open={composeOpen} onOpenChange={(o) => { if (!o) { setComposeOpen(false); setCompose(EMPTY_COMPOSE); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{compose.subject.startsWith("Re:") ? "Reply" : "New Email"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="compose-to">To</Label>
+              <Input
+                id="compose-to"
+                type="email"
+                placeholder="client@example.com"
+                value={compose.to}
+                onChange={(e) => setCompose((p) => ({ ...p, to: e.target.value }))}
+                className="bg-background"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="compose-subject">Subject</Label>
+              <Input
+                id="compose-subject"
+                placeholder="Subject"
+                value={compose.subject}
+                onChange={(e) => setCompose((p) => ({ ...p, subject: e.target.value }))}
+                className="bg-background"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="compose-body">Message</Label>
+              <Textarea
+                id="compose-body"
+                placeholder="Write your message here…"
+                rows={10}
+                value={compose.body}
+                onChange={(e) => setCompose((p) => ({ ...p, body: e.target.value }))}
+                className="bg-background resize-none"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setComposeOpen(false); setCompose(EMPTY_COMPOSE); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSend}
+                disabled={sending}
+                className="bg-primary hover:bg-primary/90"
+              >
+                <Send className="h-3.5 w-3.5 mr-1.5" />
+                {sending ? "Sending…" : "Send Email"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

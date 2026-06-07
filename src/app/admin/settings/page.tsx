@@ -29,6 +29,7 @@ const settingLabels: Record<string, string> = {
   notification_email: "Notification Recipient Email",
   notification_from_name: "From Name (shown to email recipients)",
   notification_from_email: "From Email Address",
+  notification_reply_to: "Reply-To Address (clients reply here)",
 };
 
 // Settings rendered as map picker or image upload, not as text inputs

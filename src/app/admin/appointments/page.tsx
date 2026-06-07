@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,9 +18,62 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Eye, CheckCircle, XCircle, Clock, CalendarDays } from "lucide-react";
+import {
+  Trash2, Eye, CheckCircle, XCircle, Clock, CalendarDays,
+  ChevronLeft, ChevronRight, Download, Link2, ExternalLink, RefreshCw,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import {
+  format, addMonths, subMonths, startOfMonth, endOfMonth,
+  eachDayOfInterval, startOfWeek, endOfWeek, isSameDay, isSameMonth,
+} from "date-fns";
+
+// ── ICS helpers (client-side) ─────────────────────────────────────────────
+const FIRM_ADDRESS = "2nd Floor, Plantanan Building, Primero De Mayo St., Barangay IX, Roxas City, Capiz, Philippines";
+
+function makeICS(appts: Appointment[]): string {
+  const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Delfin Law Office//EN","CALSCALE:GREGORIAN"];
+  for (const a of appts) {
+    const [h, m] = a.appointment_time.slice(0, 5).split(":").map(Number);
+    const endMin  = h * 60 + m + 60;
+    const dtStart = a.appointment_date.replace(/-/g, "") + "T" + String(h).padStart(2,"0") + String(m).padStart(2,"0") + "00";
+    const dtEnd   = a.appointment_date.replace(/-/g, "") + "T" + String(Math.floor(endMin/60)).padStart(2,"0") + String(endMin%60).padStart(2,"0") + "00";
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:${a.id}@delfinlaw.com`,
+      `DTSTART:${dtStart}`, `DTEND:${dtEnd}`,
+      `SUMMARY:${(a.consultation_type || "Legal Consultation").replace(/[\\,;]/g,"\\$&")} \u2014 ${a.name.replace(/[\\,;]/g,"\\$&")}`,
+      `DESCRIPTION:Client: ${a.name}\\nEmail: ${a.email}\\nPhone: ${a.phone || "N/A"}`,
+      `LOCATION:${FIRM_ADDRESS.replace(/[\\,;]/g,"\\$&")}`,
+      `STATUS:${a.status === "confirmed" ? "CONFIRMED" : "TENTATIVE"}`,
+      "END:VEVENT",
+    );
+  }
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+
+function downloadICS(appts: Appointment[], filename = "appointments.ics") {
+  const blob = new Blob([makeICS(appts)], { type: "text/calendar" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function googleCalLink(a: Appointment): string {
+  const [h, m] = a.appointment_time.slice(0, 5).split(":").map(Number);
+  const endMin  = h * 60 + m + 60;
+  const dtStart = a.appointment_date.replace(/-/g, "") + "T" + String(h).padStart(2,"0") + String(m).padStart(2,"0") + "00";
+  const dtEnd   = a.appointment_date.replace(/-/g, "") + "T" + String(Math.floor(endMin/60)).padStart(2,"0") + String(endMin%60).padStart(2,"0") + "00";
+  return "https://calendar.google.com/calendar/render?" + new URLSearchParams({
+    action: "TEMPLATE",
+    text:     `${a.consultation_type || "Legal Consultation"} \u2014 ${a.name}`,
+    dates:    `${dtStart}/${dtEnd}`,
+    details:  `Client: ${a.name}\nEmail: ${a.email}\nPhone: ${a.phone || "N/A"}\nType: ${a.consultation_type || "General"}`,
+    location: FIRM_ADDRESS,
+  }).toString();
+}
 
 type Appointment = {
   id: string;
@@ -71,13 +124,18 @@ export default function AppointmentsAdmin() {
   const [loading, setLoading] = useState(true);
   const [declineReason, setDeclineReason] = useState("");
   const [showDeclineInput, setShowDeclineInput] = useState(false);
+  const [calMonth, setCalMonth] = useState(new Date());
+  const [calDayStr, setCalDayStr] = useState<string | null>(null);
+  const [syncOpen, setSyncOpen] = useState(false);
+  const [calFeedToken, setCalFeedToken] = useState("");
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  // ── Fetch appointments ────────────────────────────────────────────
+  // ── Fetch ─────────────────────────────────────────────────────────
   const fetchAppointments = async () => {
-    let query = supabase.from("appointments").select("*").order("appointment_date").order("appointment_time");
-    if (filter !== "all") query = query.eq("status", filter);
-    const { data } = await query;
+    const { data } = await supabase
+      .from("appointments").select("*")
+      .order("appointment_date").order("appointment_time");
     setAppointments(data ?? []);
     setLoading(false);
   };
@@ -87,8 +145,41 @@ export default function AppointmentsAdmin() {
     setAvailability(data ?? []);
   };
 
-  useEffect(() => { fetchAppointments(); }, [filter]);
+  useEffect(() => { fetchAppointments(); }, []);
   useEffect(() => { fetchAvailability(); }, []);
+  useEffect(() => {
+    supabase.from("site_settings").select("value").eq("key", "calendar_feed_token").single()
+      .then(({ data }) => { if (data?.value) setCalFeedToken(data.value); });
+  }, []);
+
+  // ── Calendar grid ─────────────────────────────────────────────────
+  const calDays = useMemo(() => {
+    const start = startOfWeek(startOfMonth(calMonth));
+    const end   = endOfWeek(endOfMonth(calMonth));
+    return eachDayOfInterval({ start, end });
+  }, [calMonth]);
+
+  const apptsByDate = useMemo(() => {
+    const map: Record<string, Appointment[]> = {};
+    for (const a of appointments) {
+      map[a.appointment_date] = map[a.appointment_date] ?? [];
+      map[a.appointment_date].push(a);
+    }
+    return map;
+  }, [appointments]);
+
+  const dayAppts = calDayStr ? (apptsByDate[calDayStr] ?? []) : [];
+
+  // ── Feed URLs ─────────────────────────────────────────────────────
+  const feedUrl       = calFeedToken ? `https://tytczhfmwvydmylboixq.supabase.co/functions/v1/calendar-feed?token=${calFeedToken}` : "";
+  const webcalUrl     = feedUrl.replace("https://", "webcal://");
+  const gCalSubUrl    = feedUrl ? `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl)}` : "";
+
+  const copyFeedUrl = () => {
+    navigator.clipboard.writeText(webcalUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // ── Status change ─────────────────────────────────────────────────
   const handleStatusChange = async (id: string, status: string, reason?: string) => {
@@ -141,15 +232,22 @@ export default function AppointmentsAdmin() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <CalendarDays className="h-7 w-7 text-primary" />
-        <h1 className="font-headline text-3xl font-bold">Appointments</h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <CalendarDays className="h-7 w-7 text-primary" />
+          <h1 className="font-headline text-3xl font-bold">Appointments</h1>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setSyncOpen(true)}>
+          <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+          Sync Calendars
+        </Button>
       </div>
 
       <Tabs defaultValue="bookings">
         <TabsList>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="availability">Availability</TabsTrigger>
         </TabsList>
 
@@ -169,16 +267,18 @@ export default function AppointmentsAdmin() {
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-muted-foreground">{appointments.length} result{appointments.length !== 1 ? "s" : ""}</span>
+            <span className="text-sm text-muted-foreground">
+              {appointments.filter(a => filter === "all" || a.status === filter).length} result{appointments.filter(a => filter === "all" || a.status === filter).length !== 1 ? "s" : ""}
+            </span>
           </div>
 
           {loading ? (
             <p className="text-muted-foreground text-sm">Loading...</p>
-          ) : appointments.length === 0 ? (
+          ) : appointments.filter(a => filter === "all" || a.status === filter).length === 0 ? (
             <Card><CardContent className="py-12 text-center text-muted-foreground">No appointments found.</CardContent></Card>
           ) : (
             <div className="space-y-3">
-              {appointments.map(appt => (
+              {appointments.filter(a => filter === "all" || a.status === filter).map(appt => (
                 <Card key={appt.id} className="hover:border-primary/40 transition-colors cursor-pointer"
                   onClick={() => { setSelected(appt); setDialogOpen(true); }}>
                   <CardContent className="py-4 flex flex-wrap items-center gap-4">
@@ -201,6 +301,132 @@ export default function AppointmentsAdmin() {
                 </Card>
               ))}
             </div>
+          )}
+        </TabsContent>
+
+        {/* ── CALENDAR TAB ── */}
+        <TabsContent value="calendar" className="space-y-4 mt-4">
+          {/* Month navigation */}
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="icon" onClick={() => setCalMonth(m => subMonths(m, 1))}>
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <h2 className="font-headline text-xl font-semibold">
+              {format(calMonth, "MMMM yyyy")}
+            </h2>
+            <Button variant="ghost" size="icon" onClick={() => setCalMonth(m => addMonths(m, 1))}>
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Day-of-week headers */}
+          <div className="grid grid-cols-7 text-center">
+            {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => (
+              <div key={d} className="py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">{d}</div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 border-l border-t border-border rounded-lg overflow-hidden">
+            {calDays.map((day, i) => {
+              const key    = format(day, "yyyy-MM-dd");
+              const dayAps = apptsByDate[key] ?? [];
+              const isThisMonth = isSameMonth(day, calMonth);
+              const isSelected  = calDayStr === key;
+              const isToday     = isSameDay(day, new Date());
+
+              return (
+                <div
+                  key={i}
+                  onClick={() => setCalDayStr(isSelected ? null : key)}
+                  className={[
+                    "border-r border-b border-border min-h-[80px] p-1.5 cursor-pointer transition-colors",
+                    !isThisMonth ? "bg-muted/30 opacity-40" : "hover:bg-secondary/40",
+                    isSelected ? "bg-primary/10 ring-2 ring-inset ring-primary" : "",
+                  ].join(" ")}
+                >
+                  <div className={[
+                    "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full mb-1",
+                    isToday ? "bg-primary text-primary-foreground" : "text-foreground",
+                  ].join(" ")}>
+                    {format(day, "d")}
+                  </div>
+                  {/* Status dots */}
+                  <div className="flex flex-wrap gap-0.5">
+                    {dayAps.slice(0, 6).map(a => (
+                      <span
+                        key={a.id}
+                        title={`${a.name} ${a.appointment_time.slice(0,5)} (${a.status})`}
+                        className={[
+                          "w-2 h-2 rounded-full",
+                          a.status === "confirmed"  ? "bg-green-500" :
+                          a.status === "pending"    ? "bg-amber-500" :
+                          a.status === "cancelled"  ? "bg-red-400"   : "bg-muted-foreground",
+                        ].join(" ")}
+                      />
+                    ))}
+                    {dayAps.length > 6 && (
+                      <span className="text-[9px] text-muted-foreground">+{dayAps.length - 6}</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legend */}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            {[
+              { color: "bg-amber-500", label: "Pending" },
+              { color: "bg-green-500", label: "Confirmed" },
+              { color: "bg-red-400",   label: "Cancelled" },
+              { color: "bg-muted-foreground", label: "Completed" },
+            ].map(l => (
+              <span key={l.label} className="flex items-center gap-1.5">
+                <span className={`w-2.5 h-2.5 rounded-full ${l.color}`} />
+                {l.label}
+              </span>
+            ))}
+          </div>
+
+          {/* Selected day panel */}
+          {calDayStr && (
+            <Card className="border-primary/30">
+              <CardContent className="pt-4 pb-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-sm">
+                    {format(new Date(calDayStr + "T00:00:00"), "EEEE, MMMM d, yyyy")}
+                    <span className="text-muted-foreground font-normal ml-2">
+                      {dayAppts.length} appointment{dayAppts.length !== 1 ? "s" : ""}
+                    </span>
+                  </h3>
+                  {dayAppts.length > 0 && (
+                    <Button size="sm" variant="ghost" onClick={() => downloadICS(dayAppts, `appointments-${calDayStr}.ics`)}>
+                      <Download className="h-3.5 w-3.5 mr-1" />Export Day
+                    </Button>
+                  )}
+                </div>
+                {dayAppts.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-2">No appointments on this day.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {dayAppts.map(appt => (
+                      <div
+                        key={appt.id}
+                        className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-secondary/40 cursor-pointer transition-colors"
+                        onClick={() => { setSelected(appt); setDialogOpen(true); }}
+                      >
+                        <Badge className={`${statusColors[appt.status]} text-xs shrink-0`}>{appt.status}</Badge>
+                        <span className="text-sm font-medium min-w-[60px]">{appt.appointment_time.slice(0,5)}</span>
+                        <span className="text-sm font-semibold">{appt.name}</span>
+                        <span className="text-sm text-muted-foreground hidden sm:block">{appt.consultation_type || "General"}</span>
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
 
@@ -370,14 +596,110 @@ export default function AppointmentsAdmin() {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                <DialogClose asChild>
-                  <Button variant="outline" size="sm">Close</Button>
-                </DialogClose>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadICS([selected], `appointment-${selected.id.slice(0,8)}.ics`)}>
+                    <Download className="h-3.5 w-3.5 mr-1" />ICS
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={googleCalLink(selected)} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-3.5 w-3.5 mr-1" />Google Cal
+                    </a>
+                  </Button>
+                  <DialogClose asChild>
+                    <Button variant="outline" size="sm">Close</Button>
+                  </DialogClose>
+                </div>
               </div>
             </div>
           </DialogContent>
         </Dialog>
       )}
+
+      {/* ── SYNC DIALOG ── */}
+      <Dialog open={syncOpen} onOpenChange={setSyncOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-xl flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 text-primary" />
+              Sync with Calendar Apps
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Live subscribe feed */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-semibold text-sm">Live Subscription Feed</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Subscribe once — your calendar app will auto-update whenever appointments change.
+                </p>
+              </div>
+
+              {/* Copy URL */}
+              <div className="flex gap-2">
+                <code className="flex-1 text-xs bg-muted px-3 py-2 rounded-md truncate font-mono border border-border">
+                  {webcalUrl || "Loading…"}
+                </code>
+                <Button size="sm" variant="outline" onClick={copyFeedUrl} disabled={!webcalUrl}>
+                  <Link2 className="h-3.5 w-3.5 mr-1.5" />
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
+              </div>
+
+              {/* Open in apps */}
+              <div className="grid grid-cols-1 gap-2">
+                {/* Apple Calendar */}
+                <Button variant="outline" size="sm" className="justify-start" asChild>
+                  <a href={webcalUrl} onClick={() => setSyncOpen(false)}>
+                    <span className="mr-2">🍎</span>
+                    Open in Apple Calendar
+                    <ExternalLink className="h-3 w-3 ml-auto opacity-40" />
+                  </a>
+                </Button>
+                {/* Google Calendar */}
+                <Button variant="outline" size="sm" className="justify-start" asChild>
+                  <a href={gCalSubUrl} target="_blank" rel="noopener noreferrer">
+                    <span className="mr-2">📅</span>
+                    Add to Google Calendar
+                    <ExternalLink className="h-3 w-3 ml-auto opacity-40" />
+                  </a>
+                </Button>
+                {/* Outlook */}
+                <Button variant="outline" size="sm" className="justify-start" onClick={copyFeedUrl}>
+                  <span className="mr-2">📧</span>
+                  <span>
+                    Outlook: <span className="text-muted-foreground">Subscriptions → From web → paste URL</span>
+                  </span>
+                </Button>
+              </div>
+            </div>
+
+            <div className="border-t border-border" />
+
+            {/* Export */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-semibold text-sm">One-Time Export</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Download current appointments as an .ics file.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm"
+                  onClick={() => { downloadICS(appointments.filter(a => a.status !== "cancelled"), "all-appointments.ics"); setSyncOpen(false); }}>
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  All Active
+                </Button>
+                <Button variant="outline" size="sm"
+                  onClick={() => { downloadICS(appointments.filter(a => a.status === "confirmed"), "confirmed-appointments.ics"); setSyncOpen(false); }}>
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  Confirmed Only
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

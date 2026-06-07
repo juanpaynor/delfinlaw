@@ -9,8 +9,13 @@ import Logo from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
 import { ContactModal } from '@/components/contact-modal';
+import { BookingModal } from '@/components/booking-modal';
 
-export default function Header({ logoUrl, navLinks = [] }: { logoUrl?: string; navLinks?: { name: string; href: string }[] }) {
+export default function Header({ logoUrl, navLinks = [], practiceAreas = [] }: {
+  logoUrl?: string;
+  navLinks?: { name: string; href: string }[];
+  practiceAreas?: { id: string; name: string }[];
+}) {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -47,6 +52,11 @@ export default function Header({ logoUrl, navLinks = [] }: { logoUrl?: string; n
 
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
+          <BookingModal practiceAreas={practiceAreas}>
+            <Button size="sm" variant="outline" className="rounded-lg px-5 border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+              Book Appointment
+            </Button>
+          </BookingModal>
           <ContactModal>
             <Button size="sm" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg px-5">
               Get in Touch
@@ -78,13 +88,22 @@ export default function Header({ logoUrl, navLinks = [] }: { logoUrl?: string; n
                   </SheetClose>
                 ))}
               </nav>
-              <SheetClose asChild>
-                <ContactModal>
-                  <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-                    Get in Touch
-                  </Button>
-                </ContactModal>
-              </SheetClose>
+              <div className="flex flex-col gap-3">
+                <SheetClose asChild>
+                  <BookingModal practiceAreas={practiceAreas}>
+                    <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                      Book Appointment
+                    </Button>
+                  </BookingModal>
+                </SheetClose>
+                <SheetClose asChild>
+                  <ContactModal>
+                    <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                      Get in Touch
+                    </Button>
+                  </ContactModal>
+                </SheetClose>
+              </div>
             </div>
           </SheetContent>
         </Sheet>

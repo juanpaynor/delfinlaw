@@ -1,7 +1,7 @@
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
-import { getSiteSettings, getHomepageSections } from '@/lib/supabase-data';
+import { getSiteSettings, getHomepageSections, getPracticeAreas } from '@/lib/supabase-data';
 
 export const revalidate = 60;
 
@@ -21,9 +21,10 @@ export default async function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [settings, sections] = await Promise.all([
+  const [settings, sections, practiceAreas] = await Promise.all([
     getSiteSettings(),
     getHomepageSections(),
+    getPracticeAreas(),
   ]);
 
   // These are injected at fixed positions regardless of DB
@@ -43,7 +44,7 @@ export default async function PublicLayout({
 
   return (
     <>
-      <Header logoUrl={settings.logo_url || undefined} navLinks={navLinks} />
+      <Header logoUrl={settings.logo_url || undefined} navLinks={navLinks} practiceAreas={practiceAreas} />
       <main>{children}</main>
       <Footer settings={settings} />
       <Toaster />

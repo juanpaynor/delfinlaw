@@ -26,6 +26,9 @@ const settingLabels: Record<string, string> = {
   logo_url: "Logo", hero_image_url: "Hero Background Image",
   office_latitude: "Latitude", office_longitude: "Longitude",
   mission: "Mission Statement", vision: "Vision Statement", firm_history: "Firm History / Our Story",
+  notification_email: "Notification Recipient Email",
+  notification_from_name: "From Name (shown to email recipients)",
+  notification_from_email: "From Email Address",
 };
 
 // Settings rendered as map picker or image upload, not as text inputs
@@ -34,7 +37,9 @@ const imageSettings = ['logo_url', 'hero_image_url'];
 const textareaSettings = ['mission', 'vision', 'firm_history', 'firm_description'];
 
 const groupLabels: Record<string, string> = {
-  general: "General", contact: "Contact Information", social: "Social Media", branding: "Branding", about: "About Page",
+  general: "General", contact: "Contact Information", social: "Social Media",
+  branding: "Branding", about: "About Page",
+  notifications: "Email Notifications",
 };
 
 export default function SettingsAdmin() {

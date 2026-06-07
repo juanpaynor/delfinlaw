@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Scale, Users, MessageSquareQuote, FileText,
   FolderOpen, HelpCircle, Inbox, Settings, FilePlus2, LogOut, ExternalLink,
-  Menu, X, Images, CalendarDays,
+  Menu, X, Images, CalendarDays, Mail, MailOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,6 +26,8 @@ const sidebarLinks = [
   { name: "FAQs", href: "/admin/faqs", icon: HelpCircle },
   { divider: true, label: "System" },
   { name: "Appointments", href: "/admin/appointments", icon: CalendarDays },
+  { name: "Inbox", href: "/admin/inbox", icon: MailOpen },
+  { name: "Email Templates", href: "/admin/email-templates", icon: Mail },
   { name: "Inquiries", href: "/admin/inquiries", icon: Inbox },
   { name: "Pages", href: "/admin/pages", icon: FilePlus2 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
